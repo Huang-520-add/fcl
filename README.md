@@ -3,7 +3,7 @@
 > **代码在吞噬中传递，真理在分解中显现。**
 > 一门把生态学写进语法的深奥编程语言（Esolang）。变量是生态圈的在册物种，运算是一次次捕食，控制流是一场场生态演替。参考实现为 C++17 解释器。
 
-[![CI](https://img.shields.io/github/actions/workflow/status/yourname/foodchain-lang/ci.yml?branch=main&label=CI&logo=github)](https://github.com/yourname/foodchain-lang/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/Huang-520-add/fcl/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Huang-520-add/fcl/actions)
 ![类别](https://img.shields.io/badge/category-esolang-brightgreen)
 ![实现](https://img.shields.io/badge/implementation-C%2B%2B17-blue)
 ![版本](https://img.shields.io/badge/version-v2.1-orange)
@@ -88,7 +88,7 @@ foodchain-lang/
 │   ├── FCL_TUTORIAL.md      # ★ 官方教程 v2.1（12 课，含生态小课堂 + 数学实战）
 │   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.0（语法/指令/类型/GC）
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
-│   └── FCL_SPEC_v1.2.md     # 官方技术规范 v2.0
+│   └── FCL_SPEC.md          # 官方技术规范 v2.2
 ├── tests/
 │   └── run_tests.sh         # 全量测试脚本（22 用例）
 └── examples/
@@ -111,7 +111,7 @@ foodchain-lang/
 - **官方教程** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)：12 课从零入门（每课含生态小课堂 + 两个数学实战项目 + 与 Python 的全面对比）★ 学习用
 - **官方参考手册** [FCL_REFERENCE.md](docs/FCL_REFERENCE.md)：全部语法/指令/类型/GC/错误表 ★ 查阅用
 - **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)：食物链金字塔、10 个在册物种、族群结构、命名规范
-- **官方规范** [FCL_SPEC_v1.2.md](docs/FCL_SPEC_v1.2.md)：完整语法、指令集、GC 规则、错误对照表
+- **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)：完整语法、指令集、GC 规则、错误对照表
 
 ## 许可
 

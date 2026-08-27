@@ -109,6 +109,8 @@
 | `MIGRATION <物种> OVER <次数> { }` | 迁徙（能量开方衰减） | 定次循环 |
 | `HIBERNATION <物种> UNTIL <A> { }` | 冬眠（直到条件 FULL 才醒，每轮代谢消耗） | **条件循环 while** |
 | `MUTATION <物种> { CASE "特征": }` | 基因变异 | 多路选择 |
+
+> **MUTATION 覆盖全部 10 个在册物种**（v2.2）：每个物种都有对应的变异名（Wolf→Wolv、Grass→Grasse、Tiger→Tygre 等），变异概率 1/3，可配合 MATCH() 检测。
 | `EXTINCTION <物种> ;` | 灭绝（附内存遗照） | 手动回收 |
 
 ### 其他

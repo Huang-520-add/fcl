@@ -4,7 +4,8 @@
 CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 TARGET    = fcl
-SRC       = src/main.cpp
+SRCS      = src/main.cpp src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp
+OBJS      = $(SRCS:.cpp=.o)
 
 .PHONY: all build test clean
 
@@ -12,11 +13,14 @@ all: build
 
 build: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $@ $<
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 test: build
 	bash tests/run_tests.sh
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS)
