@@ -15,7 +15,7 @@ enum class ErrCode {
     STRUCTURE,   // 🌍 生态崩溃，食物链断裂！
     DIVZERO,     // 🔥 干旱导致食物链断裂
     STARVE,      // 🥀 捕食者饿死，能量为负
-    OVERFLOW,    // 🤢 胃溃疡溢出，能量归零
+    HERB_OVERFLOW,    // 🤢 胃溃疡溢出，能量归零
     TIMEOUT,     // ⏰ 冬眠过久，强制唤醒
     EXPR,        // 表达式解析失败
     UNKNOWN,
@@ -41,7 +41,7 @@ struct FclError {
             case ErrCode::STRUCTURE: return "FCL-0006";
             case ErrCode::DIVZERO:   return "FCL-0007";
             case ErrCode::STARVE:    return "FCL-0008";
-            case ErrCode::OVERFLOW:  return "FCL-0009";
+            case ErrCode::HERB_OVERFLOW:  return "FCL-0009";
             case ErrCode::TIMEOUT:   return "FCL-0010";
             case ErrCode::EXPR:      return "FCL-0011";
             default:             return "FCL-0000";
