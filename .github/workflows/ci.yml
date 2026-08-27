@@ -18,7 +18,7 @@ jobs:
       - name: 全量测试（22 用例）
         run: make test
 
-      - name: 示例冒烟（1+1 与斐波那契）
+      - name: 示例冒烟（可见输出验证）
         run: |
           ./fcl examples/plus1_visible.fc | grep -q 'U+0032'
-          ./fcl examples/fib.fc | grep -q 'U+0008'
+          ./fcl examples/example3.fc | grep -q 'U+0041'
