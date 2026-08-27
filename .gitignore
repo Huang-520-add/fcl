@@ -1,0 +1,11 @@
+# 构建产物
+/fcl
+*.o
+*.out
+/build/
+
+# 编辑器与系统
+.vscode/
+.idea/
+*.swp
+.DS_Store
