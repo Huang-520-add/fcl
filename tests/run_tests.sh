@@ -13,8 +13,7 @@ fi
 pass=0
 fail=0
 for f in examples/*.fc; do
-    "$BIN" "$f" >/dev/null 2>&1
-    ec=$?
+    if "$BIN" "$f" >/dev/null 2>&1; then ec=0; else ec=1; fi
     case "$f" in
         *err_*|*control_season_dry*) want=1 ;;
         *) want=0 ;;
@@ -23,7 +22,7 @@ for f in examples/*.fc; do
         pass=$((pass + 1))
     else
         fail=$((fail + 1))
-        echo "FAIL: $f (exit=$ec, want=$want)"
+        echo "FAIL: $f"
     fi
 done
 

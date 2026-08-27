@@ -1,9 +1,32 @@
 // ============================================================
-//  FCL (FoodChain Language) 解释器 v1.2 参考实现
+//  FCL (FoodChain Language) 解释器 v2.1 参考实现
 //  食物链语言：代码在吞噬中传递，真理在分解中显现。
-//  C++17 单文件实现 | 编译: g++ -std=c++17 -O2 -o fcl main.cpp
+//  C++17 单文件实现，跨平台（Linux / macOS / Windows）
+//  编译: g++ -std=c++17 -O2 -o fcl src/main.cpp
 // ============================================================
-#include <bits/stdc++.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <deque>
+#include <utility>
+#include <algorithm>
+#include <random>
+#include <regex>
+#include <thread>
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <cctype>
+#include <cstdlib>
+#ifndef _WIN32
+#include <unistd.h>
+#include <sys/select.h>
+#endif
 using namespace std;
 
 // ---------- 错误 ----------
