@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 编译（C++17 严格模式）
+        run: make build
+
+      - name: 全量测试（22 用例）
+        run: make test
+
+      - name: 示例冒烟（1+1 与斐波那契）
+        run: |
+          ./fcl examples/plus1_visible.fc | grep -q 'U+0032'
+          ./fcl examples/fib.fc | grep -q 'U+0008'
