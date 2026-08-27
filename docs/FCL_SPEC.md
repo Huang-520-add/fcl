@@ -1,4 +1,4 @@
-# 食物链语言（FCL）官方技术规范 v2.0
+# 食物链语言（FCL）官方技术规范 v2.3
 
 发布机构：国际深奥编程语言基金会（IOEF）
 协议名称：金字塔协议（Trophic Pyramid Protocol）

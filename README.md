@@ -6,7 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Huang-520-add/fcl/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Huang-520-add/fcl/actions)
 ![类别](https://img.shields.io/badge/category-esolang-brightgreen)
 ![实现](https://img.shields.io/badge/implementation-C%2B%2B17-blue)
-![版本](https://img.shields.io/badge/version-v2.1-orange)
+![版本](https://img.shields.io/badge/version-v2.3.0-orange)
 ![许可](https://img.shields.io/badge/license-MIT-green)
 
 ## 它是什么？
@@ -85,10 +85,10 @@ foodchain-lang/
 ├── src/
 │   └── main.cpp             # C++17 解释器（单文件参考实现，~750 行）
 ├── docs/
-│   ├── FCL_TUTORIAL.md      # ★ 官方教学书 v2.2（零基础预备课+12课+输出对照+练习）
-│   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.0（语法/指令/类型/GC）
+│   ├── FCL_TUTORIAL.md      # ★ 官方教学书 v2.3（零基础预备课+12课+输出对照+练习）
+│   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.3（语法/指令/类型/GC）
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
-│   └── FCL_SPEC.md          # 官方技术规范 v2.2
+│   └── FCL_SPEC.md          # 官方技术规范 v2.3
 ├── tests/
 │   └── run_tests.sh         # 全量测试脚本（22 用例）
 └── examples/

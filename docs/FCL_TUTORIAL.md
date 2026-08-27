@@ -1,4 +1,4 @@
-# FCL 官方教学书（FCL Textbook）v2.2
+# FCL 官方教学书（FCL Textbook）v2.3
 
 > **代码在吞噬中传递，真理在分解中显现。**
 > 这本教学书是给**完全没学过编程**的你准备的。你不需要任何编程基础——只要会打字、会算数、有好奇心，就能读完它并写出自己的 FCL 程序。
@@ -735,5 +735,5 @@ ROT Fungus_1 TO STDOUT ;
 
 ---
 
-> 教学书 v2.2 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> 教学书 v2.3 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > 语法速查：[FCL_REFERENCE.md](FCL_REFERENCE.md) ｜ 生态圈图鉴：[FCL_ECOLOGY.md](FCL_ECOLOGY.md)
