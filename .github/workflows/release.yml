@@ -34,17 +34,14 @@ jobs:
       - name: 编译发布版二进制
         shell: bash
         run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/main.cpp
-          else
-            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/main.cpp
-          fi
+          g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/main.cpp
+          mv fcl${{ matrix.ext }} fcl-${{ matrix.os }}${{ matrix.ext }}
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: fcl${{ matrix.ext }}
+          path: fcl-${{ matrix.os }}${{ matrix.ext }}
 
   publish:
     needs: build
