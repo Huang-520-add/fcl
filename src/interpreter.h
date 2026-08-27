@@ -44,6 +44,7 @@ private:
     int stmtCount_ = 0;
     bool gmo_ = false;
     bool storm_ = false;          // STORM ENABLED：RAIN>3 条语句随机乱序
+    bool numericOut_ = false;     // NUMERIC OUTPUT：ROT 直接输出数值（默认编码模式）
     bool slow_ = false;           // 生态慢放（GC sleep 模拟微生物速度）
     std::mt19937 rng_{ std::random_device{}() };
 

@@ -85,7 +85,7 @@ foodchain-lang/
 ├── src/
 │   └── main.cpp             # C++17 解释器（单文件参考实现，~750 行）
 ├── docs/
-│   ├── FCL_TUTORIAL.md      # ★ 官方教程 v2.1（12 课，含生态小课堂 + 数学实战）
+│   ├── FCL_TUTORIAL.md      # ★ 官方教学书 v2.2（零基础预备课+12课+输出对照+练习）
 │   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.0（语法/指令/类型/GC）
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
 │   └── FCL_SPEC.md          # 官方技术规范 v2.2
@@ -97,7 +97,8 @@ foodchain-lang/
     ├── example3.fc          # 附录示例 3（输出 'A' + U+0041，推荐）
     ├── fib.fc               # 斐波那契递推（MIGRATION + CLONE）
     ├── math_factorial.fc    # ★ 实战：阶乘 5!=120（输出 'x'）
-    ├── math_triangular.fc   # ★ 实战：三角数 1+..+10=55（输出 '7'）
+    ├── math_triangular.fc   # ★ 实战：三角数 1+..+10=55（编码模式输出 '7'）
+    ├── math_triangular_num.fc # ★ 三角数数值输出模式版（直接显示 55）
     ├── plus1.fc             # 1+1（ASCII 控制字符版）
     ├── plus1_visible.fc     # 25+25=50='2'（可见字符版）
     ├── eco_logic.fc         # 生态位评估与逻辑（ASSESS/SYMBIOSIS/...）
@@ -108,7 +109,7 @@ foodchain-lang/
 
 ## 文档
 
-- **官方教程** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)：12 课从零入门（每课含生态小课堂 + 两个数学实战项目 + 与 Python 的全面对比）★ 学习用
+- **官方教学书** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)：**零基础也能读**——预备课讲清编程/ASCII/报错，每课含生态小课堂、逐行讲解、**输出对照表（编码→数值）**、练习，附 ASCII 速查表与词汇表 ★ 学习用
 - **官方参考手册** [FCL_REFERENCE.md](docs/FCL_REFERENCE.md)：全部语法/指令/类型/GC/错误表 ★ 查阅用
 - **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)：食物链金字塔、10 个在册物种、族群结构、命名规范
 - **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)：完整语法、指令集、GC 规则、错误对照表

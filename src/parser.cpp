@@ -88,6 +88,8 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
         s.kind = "GMO";
     } else if (t[0] == "STORM") {
         s.kind = "STORM";
+    } else if (t[0] == "NUMERIC" && t.size() >= 2 && t[1] == "OUTPUT") {
+        s.kind = "NUMERIC";
     } else {
         throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     }

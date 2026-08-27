@@ -25,10 +25,11 @@ namespace fcl {
 // ============================================================
 void Interp::run(const std::string& raw) {
     std::string src = stripComments(raw);
-    // 全局开关（三段式之外，程序首行）：GMO / STORM
+    // 全局开关（三段式之外，程序首行）：GMO / STORM / NUMERIC OUTPUT
     size_t biomePos = src.find("BIOME");
     if (src.find("GMO") < biomePos) gmo_ = true;
     if (src.find("STORM") < biomePos) storm_ = true;
+    if (src.find("NUMERIC") < biomePos) numericOut_ = true;
 
     // 三段式提取（按顺序，禁止颠倒）
     std::string biome = extractBlock(src, "BIOME", 0);
@@ -157,6 +158,7 @@ void Interp::execOne(Stmt& s) {
         } else {
             if (s.kind == "GMO") gmo_ = true;
             else if (s.kind == "STORM") storm_ = true;
+            else if (s.kind == "NUMERIC") numericOut_ = true;
             else if (s.kind == "INTRODUCE") execIntroduce(s);
             else if (s.kind == "DEVOURS") execDevour(s);
             else if (s.kind == "CLONE") execClone(s);
@@ -314,11 +316,17 @@ void Interp::execRot(Stmt& s) {
     Variable& v = getVar(name);
     if (v.type != DECOMPOSER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有分解者可 ROT");
     if (gmo_) std::cout << "🧬";  // 转基因产品标识
-    if (!rotFired_[name]) {
+    if (numericOut_) {
+        // 数值输出模式：直接打印数值（如 55 → "55"）
+        std::cout << static_cast<long long>(v.value) << std::flush;
+        rotFired_[name] = false;
+    } else if (!rotFired_[name]) {
+        // 编码模式：第一次输出 ASCII 字符
         int iv = (int)v.value;
         std::cout << (char)iv;
         rotFired_[name] = true;
     } else {
+        // 编码模式：第二次输出 Unicode 码位
         std::printf("U+%04X", (unsigned int)(int)v.value);
         rotFired_[name] = false;
     }
