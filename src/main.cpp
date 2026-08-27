@@ -603,6 +603,12 @@ private:
     }
 
     double readNumWithTimeout(int ms) {
+#ifdef _WIN32
+        // Windows：无 POSIX select，使用阻塞读取（管道输入可用，交互模式等待输入）
+        double x;
+        if (cin >> x) return x;
+        return 0;
+#else
         fd_set set; FD_ZERO(&set); FD_SET(STDIN_FILENO, &set);
         timeval tv; tv.tv_sec = ms / 1000; tv.tv_usec = (ms % 1000) * 1000;
         if (select(STDIN_FILENO + 1, &set, nullptr, nullptr, &tv) > 0) {
@@ -610,6 +616,7 @@ private:
         }
         cout << "⏰ 捕捉超时，输入为 0" << endl;
         return 0;
+#endif
     }
 
     void execExtinction(Stmt& s) {

@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact: fcl-linux-x86_64
+            ext: ''
+          - os: windows-latest
+            artifact: fcl-windows-x86_64
+            ext: .exe
+          - os: macos-latest
+            artifact: fcl-macos-x86_64
+            ext: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 MinGW（Windows）
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc
+
+      - name: 编译发布版二进制
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/main.cpp
+          else
+            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/main.cpp
+          fi
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: fcl${{ matrix.ext }}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载全部产物
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          merge-multiple: true
+
+      - name: 发布 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
