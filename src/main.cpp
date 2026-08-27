@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         fcl::Interp ip;
         ip.setSlow(slow);
         ip.run(buf.str());
-    } catch (fcl::Error& e) {
+    } catch (fcl::FclError& e) {
         // 结构化错误输出：错误码 + 行号 + 生态报错
         std::cout << "[" << e.codeStr();
         if (e.line > 0) std::cout << " @第" << e.line << "行";

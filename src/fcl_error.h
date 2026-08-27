@@ -6,7 +6,7 @@
 
 namespace fcl {
 
-enum class Err {
+enum class ErrCode {
     SYNTAX,      // 🌿 变异物种入侵，语法免疫系统失效
     TROPHIC,     // 🦴 食性冲突，捕食者拒绝进食
     INVASIVE,    // 🌿 外来物种入侵，生态圈不予接纳！
@@ -21,29 +21,29 @@ enum class Err {
     UNKNOWN,
 };
 
-struct Error {
-    Err code = Err::UNKNOWN;
+struct FclError {
+    ErrCode code = ErrCode::UNKNOWN;
     std::string msg;
     int line = -1;   // 出错语句行号（-1 = 未知）
 
-    Error() = default;
-    Error(Err c, std::string m) : code(c), msg(std::move(m)) {}
-    Error(Err c, std::string m, int l) : code(c), msg(std::move(m)), line(l) {}
+    FclError() = default;
+    FclError(ErrCode c, std::string m) : code(c), msg(std::move(m)) {}
+    FclError(ErrCode c, std::string m, int l) : code(c), msg(std::move(m)), line(l) {}
 
     // 错误码文本（FCL-0001 格式）
     std::string codeStr() const {
         switch (code) {
-            case Err::SYNTAX:    return "FCL-0001";
-            case Err::TROPHIC:   return "FCL-0002";
-            case Err::INVASIVE:  return "FCL-0003";
-            case Err::TAXONOMY:  return "FCL-0004";
-            case Err::GENEALOGY: return "FCL-0005";
-            case Err::STRUCTURE: return "FCL-0006";
-            case Err::DIVZERO:   return "FCL-0007";
-            case Err::STARVE:    return "FCL-0008";
-            case Err::OVERFLOW:  return "FCL-0009";
-            case Err::TIMEOUT:   return "FCL-0010";
-            case Err::EXPR:      return "FCL-0011";
+            case ErrCode::SYNTAX:    return "FCL-0001";
+            case ErrCode::TROPHIC:   return "FCL-0002";
+            case ErrCode::INVASIVE:  return "FCL-0003";
+            case ErrCode::TAXONOMY:  return "FCL-0004";
+            case ErrCode::GENEALOGY: return "FCL-0005";
+            case ErrCode::STRUCTURE: return "FCL-0006";
+            case ErrCode::DIVZERO:   return "FCL-0007";
+            case ErrCode::STARVE:    return "FCL-0008";
+            case ErrCode::OVERFLOW:  return "FCL-0009";
+            case ErrCode::TIMEOUT:   return "FCL-0010";
+            case ErrCode::EXPR:      return "FCL-0011";
             default:             return "FCL-0000";
         }
     }

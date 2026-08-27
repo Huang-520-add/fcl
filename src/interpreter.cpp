@@ -33,14 +33,14 @@ void Interp::run(const std::string& raw) {
     // 三段式提取（按顺序，禁止颠倒）
     std::string biome = extractBlock(src, "BIOME", 0);
     size_t bEnd = src.find('}', src.find("BIOME"));
-    if (bEnd == std::string::npos) throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    if (bEnd == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     std::string foodweb = extractBlock(src, "FOODWEB", bEnd);
     size_t fEnd = src.find('}', src.find("FOODWEB"));
-    if (fEnd == std::string::npos) throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    if (fEnd == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     std::string decay = extractBlock(src, "DECAY", fEnd);
     // FOODWEB 必须含 DEVOURS
     if (foodweb.find("DEVOURS") == std::string::npos)
-        throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+        throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
 
     int line = 1;
     std::vector<Stmt> b = parseBlock(biome, line);
@@ -83,9 +83,9 @@ std::string Interp::stripComments(const std::string& raw) {
 
 std::string Interp::extractBlock(const std::string& src, const std::string& name, size_t from) {
     size_t p = src.find(name, from);
-    if (p == std::string::npos) throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    if (p == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     size_t ob = src.find('{', p);
-    if (ob == std::string::npos) throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    if (ob == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     int depth = 0;
     for (size_t i = ob; i < src.size(); i++) {
         if (src[i] == '{') depth++;
@@ -94,7 +94,7 @@ std::string Interp::extractBlock(const std::string& src, const std::string& name
             if (depth == 0) return src.substr(ob + 1, i - ob - 1);
         }
     }
-    throw Error(Err::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
 }
 
 // ============================================================
@@ -102,7 +102,7 @@ std::string Interp::extractBlock(const std::string& src, const std::string& name
 // ============================================================
 Variable& Interp::getVar(const std::string& name) {
     auto it = vars_.find(name);
-    if (it == vars_.end()) throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+    if (it == vars_.end()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     return it->second;
 }
 
@@ -122,7 +122,7 @@ Trophic Interp::parseTrophic(const std::string& s) {
     if (s == "CARNIVORE") return CARNIVORE;
     if (s == "APEX") return APEX;
     if (s == "DECOMPOSER") return DECOMPOSER;
-    throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+    throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
 }
 
 // ============================================================
@@ -167,9 +167,9 @@ void Interp::execOne(Stmt& s) {
             else if (s.kind == "ROT") execRot(s);
             else if (s.kind == "SPROUT") execSprout(s);
             else if (s.kind == "EXTINCTION") execExtinction(s);
-            else throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+            else throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
         }
-    } catch (Error& e) {
+    } catch (FclError& e) {
         // 补全行号（若未设置）
         if (e.line < 0) e.line = s.line;
         throw;
@@ -186,16 +186,16 @@ void Interp::execIntroduce(Stmt& s) {
     // 生态圈命名校验：物种在册 + 族群格式 + 营养级匹配
     std::string err = ecoNameError(name, t);
     if (!err.empty()) {
-        Err code = (err.rfind("🌿", 0) == 0) ? Err::INVASIVE
-                  : (err.rfind("分类学", std::string::npos) != std::string::npos ? Err::TAXONOMY : Err::GENEALOGY);
-        throw Error(code, err);
+        ErrCode code = (err.rfind("🌿", 0) == 0) ? ErrCode::INVASIVE
+                  : (err.rfind("分类学", std::string::npos) != std::string::npos ? ErrCode::TAXONOMY : ErrCode::GENEALOGY);
+        throw FclError(code, err);
     }
     size_t wi = 0;
     for (size_t i = 0; i < s.args.size(); i++) if (s.args[i] == "WITH") { wi = i; break; }
     std::string e;
     for (size_t i = wi + 1; i < s.args.size(); i++) e += s.args[i];
     double v = ExprEval::eval(e, mutated_);
-    if (t == PRODUCER && (v < 0 || v > 9999.9)) throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+    if (t == PRODUCER && (v < 0 || v > 9999.9)) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     if (t == APEX && v != 0 && v != 1) v = (v > 0) ? 1 : 0;  // 布尔归一
     vars_[name] = Variable{ name, t, v, 0, stmtCount_, true };
     varOrder_.push_back(name);
@@ -208,16 +208,16 @@ void Interp::execDevour(Stmt& s) {
     bool decayer = (s.inDecay && p.type == DECOMPOSER);  // 分解者豁免
     if (!decayer) {
         if (p.type <= q.type || (int)p.type - (int)q.type != 1)
-            throw Error(Err::TROPHIC, "🦴 食性冲突，捕食者拒绝进食");
+            throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，捕食者拒绝进食");
     }
     double th = 0;
     if (algo == "SUM") {
         th = p.value + q.value;
     } else if (algo == "DIFF") {
-        if (p.value < q.value) throw Error(Err::STARVE, "🥀 捕食者饿死，能量为负");
+        if (p.value < q.value) throw FclError(ErrCode::STARVE, "🥀 捕食者饿死，能量为负");
         th = p.value - q.value;
     } else if (algo == "PROD" || algo == "QUOT") {
-        if (p.type != APEX) throw Error(Err::TROPHIC, "🦴 食性冲突，只有顶级掠食者可 PROD/QUOT");
+        if (p.type != APEX) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有顶级掠食者可 PROD/QUOT");
         double raw = (algo == "PROD") ? p.value * q.value : (q.value == 0 ? 0 : (int)(p.value / q.value));
         // 扑咬距离：存储地址差为偶数则落空
         size_t di = addrOf(pred), dj = addrOf(prey);
@@ -228,7 +228,7 @@ void Interp::execDevour(Stmt& s) {
             th = raw;
         }
     } else {
-        throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     }
     // 能量传递税（分解者豁免；GMO 恢复 100% 效率）
     if (!decayer && !gmo_) th *= 0.2;
@@ -261,7 +261,7 @@ void Interp::execClone(Stmt& s) {
 
 void Interp::requireAPEX(const std::string& name) {
     if (getVar(name).type != APEX)
-        throw Error(Err::TROPHIC, "🦴 食性冲突，只有顶级掠食者（APEX）能承载判定");
+        throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有顶级掠食者（APEX）能承载判定");
 }
 
 void Interp::execAssess(Stmt& s) {
@@ -312,7 +312,7 @@ void Interp::execMimicry(Stmt& s) {
 void Interp::execRot(Stmt& s) {
     std::string name = s.args[1];
     Variable& v = getVar(name);
-    if (v.type != DECOMPOSER) throw Error(Err::TROPHIC, "🦴 食性冲突，只有分解者可 ROT");
+    if (v.type != DECOMPOSER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有分解者可 ROT");
     if (gmo_) std::cout << "🧬";  // 转基因产品标识
     if (!rotFired_[name]) {
         int iv = (int)v.value;
@@ -329,7 +329,7 @@ void Interp::execRot(Stmt& s) {
 void Interp::execSprout(Stmt& s) {
     std::string name = s.args[1];
     Variable& v = getVar(name);
-    if (v.type != PRODUCER) throw Error(Err::TROPHIC, "🦴 食性冲突，SPROUT 只能注入生产者");
+    if (v.type != PRODUCER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，SPROUT 只能注入生产者");
     std::cout << "📡 摩斯电码播放中（2 秒），按空格捕捉数值..." << std::endl;
     for (int i = 0; i < 10; i++) {
         std::cout << '\a' << std::flush;
@@ -391,7 +391,7 @@ void Interp::execExtinction(Stmt& s) {
         std::exit(0);
     }
     auto it = vars_.find(name);
-    if (it == vars_.end()) throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
+    if (it == vars_.end()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     // 十六进制遗照（16 行 × 16 字节）
     std::cout << "📷 " << name << " 内存遗照：" << std::endl;
     std::hash<std::string> h;

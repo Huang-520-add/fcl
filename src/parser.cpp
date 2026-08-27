@@ -48,7 +48,7 @@ static Stmt makeCompound(const std::string& head, std::vector<Stmt> body, int li
         if (q1 != std::string::npos && q2 != std::string::npos) s.branch = head.substr(q1 + 1, q2 - q1 - 1);
         else s.branch = "default";
     } else {
-        throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     }
     s.body = std::move(body);
     return s;
@@ -58,14 +58,14 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
     Stmt s;
     s.line = lineNo;
     std::vector<std::string> t = splitWS(text);
-    if (t.empty()) throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
+    if (t.empty()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     s.args = t;  // 保留原始 tokens，执行器按位置取参
     if (t[0] == "INTRODUCE") {
         s.kind = "INTRODUCE";
         size_t wi = 0;
         for (size_t i = 0; i < t.size(); i++) if (t[i] == "WITH") { wi = i; break; }
         if (wi == 0 || wi + 1 >= t.size())
-            throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
+            throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     } else if (t.size() >= 5 && t[1] == "DEVOURS" && t[3] == "USING") {
         s.kind = "DEVOURS";
     } else if (t[0] == "CLONE" && t.size() >= 4 && t[2] == "FROM") {
@@ -89,7 +89,7 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
     } else if (t[0] == "STORM") {
         s.kind = "STORM";
     } else {
-        throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     }
     return s;
 }
@@ -140,7 +140,7 @@ std::vector<Stmt> parseBlock(const std::string& src, int& lineNo) {
             if (headTrim == "DRY") {
                 // DRY 分支合并到前一个 SEASON RAIN 块（二选一语义）
                 if (stmts.empty() || stmts.back().kw != "SEASON")
-                    throw Error(Err::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
+                    throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
                 stmts.back().dryBody = parseBlock(bodySrc, subLine);
                 stmts.back().hasDry = true;
             } else if (head.rfind("MUTATION", 0) == 0) {

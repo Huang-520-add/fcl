@@ -11,7 +11,7 @@ double ExprEval::eval(const std::string& src, const std::map<std::string, bool>&
     // 表达式解析后必须到达末尾，残留 token = 语法错误（P1-4 修复）
     while (e.pos_ < e.s_.size() && isspace((unsigned char)e.s_[e.pos_])) e.pos_++;
     if (e.pos_ != e.s_.size())
-        throw Error(Err::EXPR, "🌿 变异物种入侵，表达式含无法解析的内容");
+        throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，表达式含无法解析的内容");
     return v;
 }
 
@@ -33,7 +33,7 @@ double ExprEval::term() {
         if (op == '*') {
             v = v * r;
         } else {
-            if (r == 0) throw Error(Err::DIVZERO, "🔥 干旱导致食物链断裂");
+            if (r == 0) throw FclError(ErrCode::DIVZERO, "🔥 干旱导致食物链断裂");
             v = v / r;
         }
     }
@@ -67,7 +67,7 @@ double ExprEval::factor() {
     char* endp = nullptr;
     double v = strtod(s_.c_str() + pos_, &endp);
     if (endp == s_.c_str() + pos_)
-        throw Error(Err::EXPR, "🌿 变异物种入侵，表达式含无法解析的内容");
+        throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，表达式含无法解析的内容");
     pos_ = endp - s_.c_str();
     return v;
 }
