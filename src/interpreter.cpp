@@ -247,11 +247,15 @@ void Interp::execDevour(Stmt& s) {
     if (p.type == HERBIVORE && p.value > 255) {
         p.value = 0;
         std::cout << "🤢 胃溃疡溢出，能量归零" << (realMode_ ? "（阻塞 2 秒）" : "（代码模式跳过等待）") << std::endl;
+#ifndef FCL_WASM
         if (realMode_) std::this_thread::sleep_for(std::chrono::seconds(2));
+#endif
     }
     if (p.type == CARNIVORE) {
         // 奇数行加速 / 偶数行减速 50%（仅真实模式）
+#ifndef FCL_WASM
         if (realMode_ && s.line % 2 == 0) std::this_thread::sleep_for(std::chrono::milliseconds(2));
+#endif
     }
     touch(pred);
     touch(prey);
@@ -355,7 +359,11 @@ void Interp::execSprout(Stmt& s) {
 }
 
 double Interp::readNumWithTimeout(int ms) {
-#ifdef _WIN32
+#ifdef FCL_WASM
+    // WASM/浏览器环境无标准输入：SPROUT 直接返回 0（P1-5 修复）
+    std::cout << "⏰ 浏览器版不支持标准输入，SPROUT 返回 0" << std::endl;
+    return 0;
+#elif defined(_WIN32)
     // Windows：真超时（P0-3 修复）
     // 管道输入（重定向/CI）：PeekNamedPipe 检测数据，无数据立即返回 0
     HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
@@ -533,10 +541,12 @@ void Interp::gcTick() {
         if (it == vars_.end()) continue;
         std::cout << "🍄 " << k << " 被分解者回收" << std::endl;
         // 分解等待仅真实模式生效（模拟微生物分解速度）；代码模式即时回收
+#ifndef FCL_WASM
         if (realMode_) {
             int ms = 100 + (int)(rng_() % 901);
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));
         }
+#endif
         vars_.erase(it);
         varOrder_.erase(std::remove(varOrder_.begin(), varOrder_.end(), k), varOrder_.end());
     }

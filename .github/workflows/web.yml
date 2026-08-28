@@ -33,6 +33,8 @@ jobs:
             -sWASM=1 \
             -sALLOW_MEMORY_GROWTH \
             -sEXPORTED_FUNCTIONS=_fcl_run,_fcl_version,_free \
+            -sEXPORTED_RUNTIME_METHODS='["stringToNewUTF8","UTF8ToString"]' \
+            -DFCL_WASM \
             src/web_main.cpp \
             src/ecology.cpp src/expr.cpp src/parser.cpp src/interpreter.cpp \
             -o web/fcl.js

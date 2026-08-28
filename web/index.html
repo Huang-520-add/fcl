@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <title>FCL Playground — 食物链语言在线试玩</title>
 <style>
   :root { --green:#2d6a4f; --leaf:#40916c; --bg:#f0f7f0; --dark:#1b4332; }
@@ -74,7 +75,7 @@ ROT Fungus_1 TO STDOUT ;
 let Module = null;
 createFcl().then(m => {
   Module = m;
-  document.getElementById('ver').textContent = Module._fcl_version();
+  document.getElementById('ver').textContent = Module.UTF8ToString(Module._fcl_version());
 });
 
 function runFcl() {
@@ -83,12 +84,13 @@ function runFcl() {
   const st = document.getElementById('status');
   if (!Module) { out.textContent = '⏳ WASM 尚未加载完成…'; return; }
   const t0 = performance.now();
-  const ptr = Module._fcl_run(Module.stringToNewUTF8(src));
-  const result = Module.UTF8ToString(ptr);
+  const input = Module.stringToNewUTF8(src);   // 分配输入字符串内存
+  const output = Module._fcl_run(input);       // 返回的是 web_main.cpp 的 static 缓冲区（不可 free）
+  const result = Module.UTF8ToString(output);
+  Module._free(input);                          // 释放输入，不是输出
   const ms = (performance.now() - t0).toFixed(1);
   out.textContent = result;
   st.textContent = '⏱ ' + ms + 'ms | 代码在吞噬中传递，真理在分解中显现。';
-  Module._free(ptr);
 }
 
 const EXAMPLES = {
