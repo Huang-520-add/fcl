@@ -1,4 +1,4 @@
-# FCL 官方参考手册（FCL Language Reference）v2.3
+# FCL 官方参考手册（FCL Language Reference）v2.4
 
 > **代码在吞噬中传递，真理在分解中显现。**
 > 本手册供**查阅**使用：完整定义 FCL 的语法、类型、指令、控制流与垃圾回收。
@@ -381,7 +381,7 @@ OBSERVATION: YYYY-MM-DD, Lat:<纬度>, Lon:<经度>, <内容>
 ```bash
 make build                # 等价于 g++ -std=c++17 -O2 -o fcl src/*.cpp
 ./fcl 程序文件.fc          # 正常运行
-./fcl --slow 程序文件.fc   # 生态慢放模式（GC 模拟微生物分解速度）
+./fcl --real 程序文件.fc  # 真实模式（生态等待全部生效，默认代码模式）
 ```
 
 模块结构（v2.2 起，多文件架构）：
@@ -396,5 +396,5 @@ src/
 └── interpreter.h/.cpp  # 执行引擎（指令/控制流/GC）
 ```
 
-文档版本：v2.3（参考手册）
+文档版本：v2.4（参考手册）
 最后更新：2026-08-27

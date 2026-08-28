@@ -1,7 +1,7 @@
 // ============================================================
-//  FCL (FoodChain Language) v2.3.0 —— 入口
+//  FCL (FoodChain Language) v2.4.0 —— 入口
 //  食物链语言：代码在吞噬中传递，真理在分解中显现。
-//  用法: fcl [--slow] <程序.fc>
+//  用法: fcl [--real] <程序.fc>
 //  编译: g++ -std=c++17 -O2 -o fcl src/*.cpp
 // ============================================================
 #include <fstream>
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
     if (path.empty()) {
         std::cerr << "用法: fcl [--slow|--real] <程序文件.fc>" << std::endl;
-        std::cerr << "FCL 食物链语言 v2.3.0 —— 代码在吞噬中传递，真理在分解中显现。" << std::endl;
+        std::cerr << "FCL 食物链语言 v2.4.0 —— 代码在吞噬中传递，真理在分解中显现。" << std::endl;
         std::cerr << "运行模式: 默认 CODE（快速）| --real 真实模式（生态等待生效）" << std::endl;
         return 1;
     }
