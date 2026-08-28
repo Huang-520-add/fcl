@@ -1,5 +1,12 @@
 // ============================================================
-//  FCL WebAssembly 适配层 — v2.4.0（重建时间戳触发 CI）
+//  FCL WebAssembly 适配层 — v2.4.0
+//  编译: emcc -O2 -sMODULARIZE=1 -sEXPORT_NAME=createFcl -sWASM=1 \
+//        -sALLOW_MEMORY_GROWTH -sEXPORTED_FUNCTIONS=_fcl_run,_fcl_version,_free \
+//        -sEXPORTED_RUNTIME_METHODS='["stringToNewUTF8","UTF8ToString"]' \
+//        -sEXCEPTION_DEBUG -sDISABLE_EXCEPTION_CATCHING=0 \
+//        -DFCL_WASM src/web_main.cpp src/*.cpp -o web/fcl.js
+// ============================================================
+//  注意: -sDISABLE_EXCEPTION_CATCHING=0 确保 C++ 异常正确返回错误
 // ============================================================
 #include <emscripten.h>
 #include <iostream>
