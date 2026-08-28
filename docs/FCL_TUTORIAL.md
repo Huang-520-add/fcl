@@ -746,5 +746,6 @@ ROT Fungus_1 TO STDOUT ;
 
 ---
 
-> 教学书 v2.3 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> 教学书 v2.4 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > 语法速查：[FCL_REFERENCE.md](FCL_REFERENCE.md) ｜ 生态圈图鉴：[FCL_ECOLOGY.md](FCL_ECOLOGY.md)
+
