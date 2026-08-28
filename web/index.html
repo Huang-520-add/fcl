@@ -6,34 +6,118 @@
 <link rel="icon" href="data:,">
 <title>FCL Playground — 食物链语言在线试玩</title>
 <style>
-  :root { --green:#2d6a4f; --leaf:#40916c; --bg:#f0f7f0; --dark:#1b4332; }
+  :root {
+    --green:#2d6a4f; --leaf:#40916c; --bg:#f0f7f0;
+    --dark:#1b4332; --hl-bg:#1b1b2e; --hl-keyword:#7ee8c7;
+    --hl-type:#ffd700; --hl-num:#f472b6; --hl-str:#fb923c;
+    --hl-comment:#6b7280; --hl-op:#60a5fa; --hl-error:#f87171;
+    --hl-meta:#a78bfa;
+  }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--dark); }
-  header { background:var(--green); color:#fff; padding:16px 24px; display:flex; align-items:center; gap:12px; }
+  body {
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--dark);
+  }
+  header {
+    background:var(--green); color:#fff; padding:14px 24px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
   header h1 { font-size:20px; }
-  header .tag { background:rgba(255,255,255,.2); padding:2px 10px; border-radius:12px; font-size:12px; }
+  header .tag {
+    background:rgba(255,255,255,.2); padding:2px 10px;
+    border-radius:12px; font-size:12px;
+  }
   main { display:flex; gap:16px; padding:16px 24px; flex-wrap:wrap; }
-  .panel { flex:1; min-width:320px; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
-  .panel h2 { background:var(--leaf); color:#fff; font-size:14px; padding:10px 16px; }
-  textarea { width:100%; height:420px; border:none; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; resize:vertical; outline:none; }
-  #output { width:100%; height:420px; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; overflow:auto; white-space:pre-wrap; background:#fafcfa; }
-  .toolbar { display:flex; gap:8px; padding:10px 16px; border-top:1px solid #eee; align-items:center; }
-  button { background:var(--green); color:#fff; border:none; padding:8px 20px; border-radius:8px; font-size:14px; cursor:pointer; }
+  .panel {
+    flex:1; min-width:320px; background:#fff;
+    border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08);
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .panel h2 {
+    background:var(--leaf); color:#fff; font-size:14px;
+    padding:10px 16px; flex-shrink:0;
+  }
+  /* ---- 代码编辑器（语法高亮层叠在 textarea 上） ---- */
+  .editor-wrap { position:relative; flex:1; display:flex; flex-direction:column; min-height:420px; }
+  #code-display {
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    padding:14px; font-family:Consolas,monospace; font-size:13px;
+    line-height:1.6; white-space:pre-wrap; word-wrap:break-word;
+    overflow:auto; pointer-events:none; z-index:1;
+    color:#555; background:transparent; border:none; outline:none;
+  }
+  #code-display .k  { color:var(--hl-keyword); font-weight:bold; }
+  #code-display .t  { color:var(--hl-type); }
+  #code-display .n  { color:var(--hl-num); }
+  #code-display .o  { color:var(--hl-op); }
+  #code-display .c  { color:var(--hl-comment); font-style:italic; }
+  #code-display .m  { color:var(--hl-meta); }
+  #code-display .e  { color:var(--hl-error); background:rgba(248,113,113,.15); border-radius:2px; }
+  #code {
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    width:100%; height:100%; padding:14px;
+    font-family:Consolas,monospace; font-size:13px; line-height:1.6;
+    background:transparent; color:transparent; caret-color:#1b4332;
+    border:none; outline:none; resize:none; z-index:2;
+    white-space:pre-wrap; word-wrap:break-word; overflow:auto;
+  }
+  /* ---- 输出区域 ---- */
+  #output {
+    flex:1; padding:14px; font-family:Consolas,monospace; font-size:13px;
+    line-height:1.6; overflow:auto; white-space:pre-wrap;
+    background:#fafcfa; color:#1b4332; min-height:420px;
+  }
+  #output.loading  { color:#888; font-style:italic; }
+  #output.error    { color:#dc2626; }
+  #output.ok       { color:#166534; }
+  .toolbar {
+    display:flex; gap:8px; padding:10px 16px;
+    border-top:1px solid #eee; align-items:center; flex-shrink:0;
+  }
+  button {
+    background:var(--green); color:#fff; border:none;
+    padding:8px 20px; border-radius:8px; font-size:14px; cursor:pointer;
+    flex-shrink:0;
+  }
   button:hover { background:var(--dark); }
-  select { padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:13px; flex:1; }
+  button:disabled { background:#aaa; cursor:not-allowed; }
+  select, input[type="range"] {
+    padding:6px 10px; border-radius:6px; border:1px solid #ccc;
+    font-size:13px;
+  }
+  /* ---- 语法主题切换 ---- */
+  .theme-toggle { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .theme-toggle span { font-size:12px; color:#fff; }
+  #theme-switch { width:48px; height:24px; cursor:pointer; accent-color:#fff; }
   footer { text-align:center; padding:12px; font-size:12px; color:#666; }
-  #status { font-size:12px; color:#888; }
+  footer a { color:#2d6a4f; }
+  /* 深色主题 */
+  body.dark .panel   { background:#1e1e2e; color:#e2e8f0; }
+  body.dark #output   { background:#1e1e2e; color:#e2e8f0; }
+  body.dark #code-display { color:#555; }
+  body.dark header    { background:#0f2027; }
+  body.dark .panel h2 { background:#14532d; }
+  body.dark button    { background:#166534; }
+  body.dark button:hover { background:#14532d; }
 </style>
 </head>
 <body>
 <header>
   <h1>🐾 FCL Playground</h1>
   <span class="tag">FoodChain Language <span id="ver">加载中…</span></span>
+  <div class="theme-toggle">
+    <span>🌙</span>
+    <input type="checkbox" id="theme-switch" title="切换深色主题">
+    <span>🌑</span>
+  </div>
 </header>
 <main>
   <div class="panel">
     <h2>🌿 代码（BIOME → FOODWEB → DECAY）</h2>
-    <textarea id="code" spellcheck="false">GMO ENABLED ;
+    <div class="editor-wrap">
+      <div id="code-display" aria-hidden="true"></div>
+      <textarea id="code" spellcheck="false" autocorrect="off" autocapitalize="off"
+        placeholder="在此输入 FCL 代码…">GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;
@@ -47,8 +131,9 @@ INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
 Fungus_1 DEVOURS Sheep_M1 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }</textarea>
+    </div>
     <div class="toolbar">
-      <button onclick="runFcl()">▶ 运行</button>
+      <button id="btn-run" onclick="runFcl()">▶ 运行</button>
       <select id="examples" onchange="loadExample()">
         <option value="">— 加载示例 —</option>
         <option value="example3">example3.fc（输出 'A'）</option>
@@ -67,37 +152,140 @@ ROT Fungus_1 TO STDOUT ;
   </div>
 </main>
 <footer>
-  代码在吞噬中传递，真理在分解中显现。| <a href="https://github.com/Huang-520-add/fcl" target="_blank">GitHub 仓库</a>
+  代码在吞噬中传递，真理在分解中显现。|
+  <a href="https://github.com/Huang-520-add/fcl" target="_blank">GitHub 仓库</a>
 </footer>
 
 <script src="fcl.js"></script>
 <script>
 let Module = null;
+
+// ---- FCL 关键字语法高亮 ----
+const KWS = [
+  'BIOME','FOODWEB','DECAY','INTRODUCE','AS','WITH','DEVOURS','USING',
+  'ROT','TO','STDOUT','CLONE','FROM','ASSESS','AGAINST','SYMBIOSIS',
+  'COMPETITION','OR','MIMICRY','SEASON','RAIN','DRY','MIGRATION',
+  'OVER','HIBERNATION','UNTIL','MUTATION','EXTINCTION','GMO','ENABLED',
+  'NUMERIC','OUTPUT','REAL','MODE','CODE','SPRING','STORM','SYMBIOSIS',
+  'PRODUCER','HERBIVORE','CARNIVORE','APEX','DECOMPOSER','SUM','PROD',
+  'MAX','MIN','OBSERVATION'
+];
+const KW_SET = new Set(KWS);
+const TYPE_WORDS = new Set(['PRODUCER','HERBIVORE','CARNIVORE','APEX','DECOMPOSER']);
+const OP_WORDS  = new Set(['SUM','PROD','MAX','MIN','STDOUT']);
+const META_WORDS = new Set(['GMO','ENABLED','NUMERIC','OUTPUT','REAL','MODE','CODE','SEASON','RAIN','DRY','STORM','SPRING','OBSERVATION','OVER','UNTIL','OR','AS','WITH','USING','TO','AGAINST','FROM','AND','AS']);
+
+// 语法高亮
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlight(src) {
+  const out = [];
+  const lines = src.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // 整行注释（小写开头或 OBSERVATION）
+    if (/^\s*(OBSERVATION:|\/\/|#)/.test(line) || /^\s*[a-z]/.test(line)) {
+      out.push('<span class="c">' + escapeHtml(line) + '</span>');
+      continue;
+    }
+    // 逐 token 高亮
+    const tokens = line.match(/[A-Z_][A-Z0-9_]*|'[^']*'|"[^"]*"|[+\-*/%=<>!&|;{}[\]().,:\/\\~^]+|-?[0-9]+(?:\.[0-9]+)?|\s+|\S/g) || [];
+    for (const tok of tokens) {
+      if (/^\s+$/.test(tok)) { out.push(tok); continue; }
+      if (/^'[^']*'$/.test(tok) || /^"[^"]*"$/.test(tok)) {
+        out.push('<span class="str">' + escapeHtml(tok) + '</span>');
+      } else if (/^-?[0-9]+(?:\.[0-9]+)?$/.test(tok)) {
+        out.push('<span class="n">' + escapeHtml(tok) + '</span>');
+      } else if (KW_SET.has(tok)) {
+        if (TYPE_WORDS.has(tok))  out.push('<span class="t">' + escapeHtml(tok) + '</span>');
+        else if (OP_WORDS.has(tok)) out.push('<span class="o">' + escapeHtml(tok) + '</span>');
+        else out.push('<span class="k">' + escapeHtml(tok) + '</span>');
+      } else {
+        out.push(escapeHtml(tok));
+      }
+    }
+    out.push('\n');
+  }
+  return out.join('');
+}
+
+// 同步高亮
+function updateHighlight() {
+  const src = document.getElementById('code').value;
+  document.getElementById('code-display').innerHTML = highlight(src);
+}
+
+// textarea 同步滚动
+function syncScroll() {
+  const ta = document.getElementById('code');
+  const dh = document.getElementById('code-display');
+  dh.scrollTop = ta.scrollTop;
+  dh.scrollLeft = ta.scrollLeft;
+}
+
+// 初始化
 createFcl().then(m => {
   Module = m;
   document.getElementById('ver').textContent = Module.UTF8ToString(Module._fcl_version());
+  document.getElementById('btn-run').disabled = false;
 });
 
+// 事件绑定
+const codeEl = document.getElementById('code');
+codeEl.addEventListener('input',  updateHighlight);
+codeEl.addEventListener('scroll', syncScroll);
+codeEl.addEventListener('keydown', e => {
+  // Tab 插入 2 个空格
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = codeEl.selectionStart, en = codeEl.selectionEnd;
+    codeEl.value = codeEl.value.slice(0,s) + '  ' + codeEl.value.slice(en);
+    codeEl.selectionStart = codeEl.selectionEnd = s + 2;
+    updateHighlight();
+  }
+  // Ctrl+Enter 运行
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runFcl(); }
+});
+
+// 主题切换
+document.getElementById('theme-switch').addEventListener('change', function() {
+  document.body.classList.toggle('dark', this.checked);
+  updateHighlight();
+});
+
+// ---- 运行 ----
 function runFcl() {
   const src = document.getElementById('code').value;
   const out = document.getElementById('output');
   const st = document.getElementById('status');
   if (!Module) { out.textContent = '⏳ WASM 尚未加载完成…'; return; }
-  // 清空旧输出，显示加载状态
+
   out.textContent = '⏳ 正在分解…';
-  out.scrollTop = out.scrollHeight;
-  const t0 = performance.now();
-  const input = Module.stringToNewUTF8(src);   // 分配输入字符串内存
-  const output = Module._fcl_run(input);       // 返回的是 web_main.cpp 的 static 缓冲区（不可 free）
-  const result = Module.UTF8ToString(output);
-  Module._free(input);                          // 释放输入，不是输出
-  const ms = (performance.now() - t0).toFixed(1);
-  out.textContent = result;
-  out.scrollTop = out.scrollHeight;
-  st.textContent = '⏱ ' + ms + 'ms | 代码在吞噬中传递，真理在分解中显现。';
+  out.className = 'loading';
+  st.textContent = '';
+  // 异步运行，避免 UI 卡死
+  setTimeout(() => {
+    const t0 = performance.now();
+    const input  = Module.stringToNewUTF8(src);
+    const output = Module._fcl_run(input);
+    const result = Module.UTF8ToString(output);
+    const ms     = (performance.now() - t0).toFixed(1);
+    Module._free(input);
+
+    out.textContent = result;
+    // 错误行标红
+    if (/\[FCL-\d+\]/.test(result) || /ERROR|错误|异常/.test(result)) {
+      out.className = 'error';
+    } else {
+      out.className = 'ok';
+    }
+    st.textContent = '⏱ ' + ms + 'ms | ' +
+      (out.className === 'error' ? '❌ 运行出错' : '✅ 运行完毕');
+  }, 10);
 }
 
-// ===== 示例代码库（key 与 <option value=""> 对应）=====
+// ---- 示例库 ----
 const EXAMPLES = {
   'example3': `GMO ENABLED ;
 NUMERIC OUTPUT ;
@@ -231,10 +419,16 @@ function loadExample() {
   const key = document.getElementById('examples').value;
   if (key && EXAMPLES[key]) {
     document.getElementById('code').value = EXAMPLES[key];
-    document.getElementById('output').textContent = '已加载示例，修改后点击「运行」';
+    updateHighlight();
+    const out = document.getElementById('output');
+    out.textContent = '已加载示例，修改后点击「运行」';
+    out.className = '';
     document.getElementById('status').textContent = '';
   }
 }
+
+// 初始高亮
+updateHighlight();
 </script>
 </body>
 </html>
