@@ -90,6 +90,10 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
         s.kind = "STORM";
     } else if (t[0] == "NUMERIC" && t.size() >= 2 && t[1] == "OUTPUT") {
         s.kind = "NUMERIC";
+    } else if (t[0] == "REAL" && t.size() >= 2 && t[1] == "MODE") {
+        s.kind = "REALMODE";
+    } else if (t[0] == "CODE" && t.size() >= 2 && t[1] == "MODE") {
+        s.kind = "CODEMODE";
     } else {
         throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     }

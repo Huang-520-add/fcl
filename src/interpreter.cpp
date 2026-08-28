@@ -25,11 +25,12 @@ namespace fcl {
 // ============================================================
 void Interp::run(const std::string& raw) {
     std::string src = stripComments(raw);
-    // 全局开关（三段式之外，程序首行）：GMO / STORM / NUMERIC OUTPUT
+    // 全局开关（三段式之外，程序首行）：GMO / STORM / NUMERIC OUTPUT / REAL MODE
     size_t biomePos = src.find("BIOME");
     if (src.find("GMO") < biomePos) gmo_ = true;
     if (src.find("STORM") < biomePos) storm_ = true;
     if (src.find("NUMERIC") < biomePos) numericOut_ = true;
+    if (src.find("REAL MODE") < biomePos) realMode_ = true;
 
     // 三段式提取（按顺序，禁止颠倒）
     std::string biome = extractBlock(src, "BIOME", 0);
@@ -88,7 +89,10 @@ std::string Interp::extractBlock(const std::string& src, const std::string& name
     size_t ob = src.find('{', p);
     if (ob == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     int depth = 0;
+    bool inStr = false;  // 字符串内的 { } 不计入嵌套（CASE "特征{...}" 安全）
     for (size_t i = ob; i < src.size(); i++) {
+        if (src[i] == '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
         if (src[i] == '{') depth++;
         else if (src[i] == '}') {
             depth--;
@@ -159,6 +163,8 @@ void Interp::execOne(Stmt& s) {
             if (s.kind == "GMO") gmo_ = true;
             else if (s.kind == "STORM") storm_ = true;
             else if (s.kind == "NUMERIC") numericOut_ = true;
+            else if (s.kind == "REALMODE") realMode_ = true;
+            else if (s.kind == "CODEMODE") realMode_ = false;
             else if (s.kind == "INTRODUCE") execIntroduce(s);
             else if (s.kind == "DEVOURS") execDevour(s);
             else if (s.kind == "CLONE") execClone(s);
@@ -237,15 +243,15 @@ void Interp::execDevour(Stmt& s) {
     p.value = th;
     // 猎物被消化
     q.value = 0;
-    // HERBIVORE 胃溃疡溢出
+    // HERBIVORE 胃溃疡溢出（生态惩罚：真实模式阻塞 2 秒，代码模式即时）
     if (p.type == HERBIVORE && p.value > 255) {
         p.value = 0;
-        std::cout << "🤢 胃溃疡溢出，能量归零（阻塞 2 秒）" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::cout << "🤢 胃溃疡溢出，能量归零" << (realMode_ ? "（阻塞 2 秒）" : "（代码模式跳过等待）") << std::endl;
+        if (realMode_) std::this_thread::sleep_for(std::chrono::seconds(2));
     }
     if (p.type == CARNIVORE) {
-        // 奇数行加速 / 偶数行减速 50%
-        if (s.line % 2 == 0) std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        // 奇数行加速 / 偶数行减速 50%（仅真实模式）
+        if (realMode_ && s.line % 2 == 0) std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     touch(pred);
     touch(prey);
@@ -526,8 +532,8 @@ void Interp::gcTick() {
         auto it = vars_.find(k);
         if (it == vars_.end()) continue;
         std::cout << "🍄 " << k << " 被分解者回收" << std::endl;
-        // P1-3 修复：GC 阻塞仅在生态慢放模式（--slow）下生效
-        if (slow_) {
+        // 分解等待仅真实模式生效（模拟微生物分解速度）；代码模式即时回收
+        if (realMode_) {
             int ms = 100 + (int)(rng_() % 901);
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));
         }

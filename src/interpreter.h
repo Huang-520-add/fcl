@@ -30,7 +30,7 @@ struct Variable {
 class Interp {
 public:
     void run(const std::string& raw);
-    void setSlow(bool v) { slow_ = v; }   // 生态慢放模式（GC 模拟微生物速度）
+    void setRealMode(bool v) { realMode_ = v; }  // 真实模式：生态等待生效（进食/分解/溢出惩罚）
 
 private:
     std::map<std::string, Variable> vars_;
@@ -45,7 +45,7 @@ private:
     bool gmo_ = false;
     bool storm_ = false;          // STORM ENABLED：RAIN>3 条语句随机乱序
     bool numericOut_ = false;     // NUMERIC OUTPUT：ROT 直接输出数值（默认编码模式）
-    bool slow_ = false;           // 生态慢放（GC sleep 模拟微生物速度）
+    bool realMode_ = false;       // REAL MODE：生态等待生效（默认 CODE 快速模式）
     std::mt19937 rng_{ std::random_device{}() };
 
     // 预处理与结构
