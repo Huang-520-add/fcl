@@ -26,10 +26,11 @@ jobs:
       - name: 编译（C++17 严格模式）
         shell: bash
         run: |
+          SRCS="src/main.cpp src/ecology.cpp src/expr.cpp src/parser.cpp src/interpreter.cpp"
           if [ "$RUNNER_OS" = "Windows" ]; then
-            g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -o fcl.exe src/*.cpp
+            g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -o fcl.exe $SRCS
           else
-            g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -o fcl src/*.cpp
+            g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -o fcl $SRCS
           fi
 
       - name: 全量测试（22 用例）

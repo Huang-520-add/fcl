@@ -1,0 +1,55 @@
+name: Web Playground
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.64
+
+      - name: 编译 FCL 为 WASM
+        run: |
+          emcc -O2 \
+            -sMODULARIZE=1 \
+            -sEXPORT_NAME=createFcl \
+            -sWASM=1 \
+            -sALLOW_MEMORY_GROWTH \
+            -sEXPORTED_FUNCTIONS=_fcl_run,_fcl_version,_free \
+            src/web_main.cpp \
+            src/ecology.cpp src/expr.cpp src/parser.cpp src/interpreter.cpp \
+            -o web/fcl.js
+
+      - name: 验证 WASM 构建产物
+        run: |
+          ls -la web/fcl.js web/fcl.wasm
+          echo "✅ WASM 构建成功"
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传 Pages 产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/
+
+      - name: 部署 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCL Playground — 食物链语言在线试玩</title>
+<style>
+  :root { --green:#2d6a4f; --leaf:#40916c; --bg:#f0f7f0; --dark:#1b4332; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--dark); }
+  header { background:var(--green); color:#fff; padding:16px 24px; display:flex; align-items:center; gap:12px; }
+  header h1 { font-size:20px; }
+  header .tag { background:rgba(255,255,255,.2); padding:2px 10px; border-radius:12px; font-size:12px; }
+  main { display:flex; gap:16px; padding:16px 24px; flex-wrap:wrap; }
+  .panel { flex:1; min-width:320px; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
+  .panel h2 { background:var(--leaf); color:#fff; font-size:14px; padding:10px 16px; }
+  textarea { width:100%; height:420px; border:none; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; resize:vertical; outline:none; }
+  #output { width:100%; height:420px; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; overflow:auto; white-space:pre-wrap; background:#fafcfa; }
+  .toolbar { display:flex; gap:8px; padding:10px 16px; border-top:1px solid #eee; align-items:center; }
+  button { background:var(--green); color:#fff; border:none; padding:8px 20px; border-radius:8px; font-size:14px; cursor:pointer; }
+  button:hover { background:var(--dark); }
+  select { padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:13px; flex:1; }
+  footer { text-align:center; padding:12px; font-size:12px; color:#666; }
+  #status { font-size:12px; color:#888; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐾 FCL Playground</h1>
+  <span class="tag">FoodChain Language <span id="ver">加载中…</span></span>
+</header>
+<main>
+  <div class="panel">
+    <h2>🌿 代码（BIOME → FOODWEB → DECAY）</h2>
+    <textarea id="code" spellcheck="false">GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+}
+FOODWEB {
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+}
+DECAY {
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}</textarea>
+    <div class="toolbar">
+      <button onclick="runFcl()">▶ 运行</button>
+      <select id="examples" onchange="loadExample()">
+        <option value="">— 加载示例 —</option>
+        <option>example3.fc（输出 'A'）</option>
+        <option>plus1_visible.fc（1+1 可见版）</option>
+        <option>math_triangular_num.fc（三角数 55）</option>
+        <option>fib.fc（斐波那契）</option>
+        <option>math_factorial.fc（阶乘 120）</option>
+        <option>eco_hibernate.fc（冬眠）</option>
+      </select>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>🍄 输出（分解者的矿化）</h2>
+    <div id="output">点击「运行」开始你的生态推演…</div>
+    <div class="toolbar"><span id="status"></span></div>
+  </div>
+</main>
+<footer>
+  代码在吞噬中传递，真理在分解中显现。| <a href="https://github.com/Huang-520-add/fcl" target="_blank">GitHub 仓库</a>
+</footer>
+
+<script src="fcl.js"></script>
+<script>
+let Module = null;
+createFcl().then(m => {
+  Module = m;
+  document.getElementById('ver').textContent = Module._fcl_version();
+});
+
+function runFcl() {
+  const src = document.getElementById('code').value;
+  const out = document.getElementById('output');
+  const st = document.getElementById('status');
+  if (!Module) { out.textContent = '⏳ WASM 尚未加载完成…'; return; }
+  const t0 = performance.now();
+  const ptr = Module._fcl_run(Module.stringToNewUTF8(src));
+  const result = Module.UTF8ToString(ptr);
+  const ms = (performance.now() - t0).toFixed(1);
+  out.textContent = result;
+  st.textContent = '⏱ ' + ms + 'ms | 代码在吞噬中传递，真理在分解中显现。';
+  Module._free(ptr);
+}
+
+const EXAMPLES = {
+  'example3.fc（输出 \'A\'）': `GMO ENABLED ;
+BIOME {
+INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+}
+FOODWEB {
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+}
+DECAY {
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}`,
+  'plus1_visible.fc（1+1 可见版）': `GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Grass_1 AS PRODUCER WITH 25 ;
+INTRODUCE Grass_2 AS PRODUCER WITH 25 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+}
+FOODWEB {
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+Sheep_M1 DEVOURS Grass_2 USING SUM ;
+}
+DECAY {
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}`,
+  'math_triangular_num.fc（三角数 55）': `GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
+INTRODUCE Grass_2 AS PRODUCER WITH 2 ;
+INTRODUCE Grass_3 AS PRODUCER WITH 3 ;
+INTRODUCE Grass_4 AS PRODUCER WITH 4 ;
+INTRODUCE Grass_5 AS PRODUCER WITH 5 ;
+INTRODUCE Grass_6 AS PRODUCER WITH 6 ;
+INTRODUCE Grass_7 AS PRODUCER WITH 7 ;
+INTRODUCE Grass_8 AS PRODUCER WITH 8 ;
+INTRODUCE Grass_9 AS PRODUCER WITH 9 ;
+INTRODUCE Grass_10 AS PRODUCER WITH 10 ;
+}
+FOODWEB {
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+Sheep_M1 DEVOURS Grass_2 USING SUM ;
+Sheep_M1 DEVOURS Grass_3 USING SUM ;
+Sheep_M1 DEVOURS Grass_4 USING SUM ;
+Sheep_M1 DEVOURS Grass_5 USING SUM ;
+Sheep_M1 DEVOURS Grass_6 USING SUM ;
+Sheep_M1 DEVOURS Grass_7 USING SUM ;
+Sheep_M1 DEVOURS Grass_8 USING SUM ;
+Sheep_M1 DEVOURS Grass_9 USING SUM ;
+Sheep_M1 DEVOURS Grass_10 USING SUM ;
+}
+DECAY {
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}`,
+  'fib.fc（斐波那契）': `GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
+INTRODUCE Grass_2 AS PRODUCER WITH 1 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Algae_1 AS PRODUCER WITH 0 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+}
+FOODWEB {
+MIGRATION Sheep_M1 OVER 5 {
+CLONE Algae_1 FROM Grass_2 ;
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+Sheep_M1 DEVOURS Grass_2 USING SUM ;
+CLONE Grass_1 FROM Algae_1 ;
+CLONE Grass_2 FROM Sheep_M1 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Algae_1 AS PRODUCER WITH 0 ;
+}
+}
+DECAY {
+Fungus_1 DEVOURS Grass_2 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}`,
+  'math_factorial.fc（阶乘 120）': `GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Tiger_1 AS APEX WITH 1 ;
+INTRODUCE Fox_1 AS CARNIVORE WITH 0 ;
+INTRODUCE Wolf_M1 AS CARNIVORE WITH 2 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 1 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+}
+FOODWEB {
+MIGRATION Sheep_M1 OVER 4 {
+CLONE Fox_1 FROM Wolf_M1 ;
+Tiger_1 DEVOURS Fox_1 USING PROD ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 1 ;
+Wolf_M1 DEVOURS Sheep_M1 USING SUM ;
+}
+}
+DECAY {
+Fungus_1 DEVOURS Tiger_1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}`,
+  'eco_hibernate.fc（冬眠）': `GMO ENABLED ;
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
+INTRODUCE Rabbit_1 AS HERBIVORE WITH 0 ;
+INTRODUCE Lion_F1 AS APEX WITH 1 ;
+INTRODUCE Tiger_1 AS APEX WITH 0 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 100 ;
+}
+FOODWEB {
+Rabbit_1 DEVOURS Grass_1 USING SUM ;
+HIBERNATION Fungus_1 UNTIL Tiger_1 {
+MIMICRY Lion_F1 TO Tiger_1 ;
+SYMBIOSIS Lion_F1 WITH Tiger_1 TO Lion_F1 ;
+}
+}
+DECAY {
+ROT Fungus_1 TO STDOUT ;
+}`
+};
+
+function loadExample() {
+  const key = document.getElementById('examples').value;
+  if (key && EXAMPLES[key]) document.getElementById('code').value = EXAMPLES[key];
+}
+</script>
+</body>
+</html>

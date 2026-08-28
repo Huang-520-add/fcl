@@ -34,11 +34,12 @@ jobs:
       - name: 编译发布版二进制
         shell: bash
         run: |
+          SRCS="src/main.cpp src/ecology.cpp src/expr.cpp src/parser.cpp src/interpreter.cpp"
           if [ "$RUNNER_OS" = "Windows" ]; then
             # Windows: 静态链接，exe 自包含免装运行时
-            g++ -std=c++17 -O2 -s -static -o fcl${{ matrix.ext }} src/*.cpp
+            g++ -std=c++17 -O2 -s -static -o fcl${{ matrix.ext }} $SRCS
           else
-            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} src/*.cpp
+            g++ -std=c++17 -O2 -s -o fcl${{ matrix.ext }} $SRCS
           fi
           mv fcl${{ matrix.ext }} fcl-${{ matrix.os }}${{ matrix.ext }}
 
