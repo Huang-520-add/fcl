@@ -8,6 +8,8 @@
 ![实现](https://img.shields.io/badge/implementation-C%2B%2B17-blue)
 ![版本](https://img.shields.io/badge/version-v2.4.0-orange)
 ![许可](https://img.shields.io/badge/license-MIT-green)
+[![在线试玩](https://img.shields.io/badge/🧪-在线试玩-2d6a4f?style=flat-square)](https://huang-520-add.github.io/fcl/web/index.html)
+[![文档目录](https://img.shields.io/badge/📚-文档总览-40916c?style=flat-square)](#-文档与教程)
 
 ## 它是什么？
 
