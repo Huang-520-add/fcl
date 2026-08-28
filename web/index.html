@@ -51,12 +51,12 @@ ROT Fungus_1 TO STDOUT ;
       <button onclick="runFcl()">▶ 运行</button>
       <select id="examples" onchange="loadExample()">
         <option value="">— 加载示例 —</option>
-        <option>example3.fc（输出 'A'）</option>
-        <option>plus1_visible.fc（1+1 可见版）</option>
-        <option>math_triangular_num.fc（三角数 55）</option>
-        <option>fib.fc（斐波那契）</option>
-        <option>math_factorial.fc（阶乘 120）</option>
-        <option>eco_hibernate.fc（冬眠）</option>
+        <option value="example3">example3.fc（输出 'A'）</option>
+        <option value="plus1_visible">plus1_visible.fc（1+1 可见版）</option>
+        <option value="math_triangular_num">math_triangular_num.fc（三角数 55）</option>
+        <option value="fib">fib.fc（斐波那契）</option>
+        <option value="math_factorial">math_factorial.fc（阶乘 120）</option>
+        <option value="eco_hibernate">eco_hibernate.fc（冬眠）</option>
       </select>
     </div>
   </div>
@@ -83,6 +83,9 @@ function runFcl() {
   const out = document.getElementById('output');
   const st = document.getElementById('status');
   if (!Module) { out.textContent = '⏳ WASM 尚未加载完成…'; return; }
+  // 清空旧输出，显示加载状态
+  out.textContent = '⏳ 正在分解…';
+  out.scrollTop = out.scrollHeight;
   const t0 = performance.now();
   const input = Module.stringToNewUTF8(src);   // 分配输入字符串内存
   const output = Module._fcl_run(input);       // 返回的是 web_main.cpp 的 static 缓冲区（不可 free）
@@ -90,11 +93,14 @@ function runFcl() {
   Module._free(input);                          // 释放输入，不是输出
   const ms = (performance.now() - t0).toFixed(1);
   out.textContent = result;
+  out.scrollTop = out.scrollHeight;
   st.textContent = '⏱ ' + ms + 'ms | 代码在吞噬中传递，真理在分解中显现。';
 }
 
+// ===== 示例代码库（key 与 <option value=""> 对应）=====
 const EXAMPLES = {
-  'example3.fc（输出 \'A\'）': `GMO ENABLED ;
+  'example3': `GMO ENABLED ;
+NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;
 INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
@@ -107,7 +113,7 @@ INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
 Fungus_1 DEVOURS Sheep_M1 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }`,
-  'plus1_visible.fc（1+1 可见版）': `GMO ENABLED ;
+  'plus1_visible': `GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Grass_1 AS PRODUCER WITH 25 ;
@@ -123,7 +129,7 @@ DECAY {
 Fungus_1 DEVOURS Sheep_M1 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }`,
-  'math_triangular_num.fc（三角数 55）': `GMO ENABLED ;
+  'math_triangular_num': `GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
@@ -155,7 +161,7 @@ INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
 Fungus_1 DEVOURS Sheep_M1 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }`,
-  'fib.fc（斐波那契）': `GMO ENABLED ;
+  'fib': `GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
@@ -179,7 +185,7 @@ DECAY {
 Fungus_1 DEVOURS Grass_2 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }`,
-  'math_factorial.fc（阶乘 120）': `GMO ENABLED ;
+  'math_factorial': `GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Tiger_1 AS APEX WITH 1 ;
@@ -200,7 +206,7 @@ DECAY {
 Fungus_1 DEVOURS Tiger_1 USING SUM ;
 ROT Fungus_1 TO STDOUT ;
 }`,
-  'eco_hibernate.fc（冬眠）': `GMO ENABLED ;
+  'eco_hibernate': `GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
 INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
@@ -223,7 +229,11 @@ ROT Fungus_1 TO STDOUT ;
 
 function loadExample() {
   const key = document.getElementById('examples').value;
-  if (key && EXAMPLES[key]) document.getElementById('code').value = EXAMPLES[key];
+  if (key && EXAMPLES[key]) {
+    document.getElementById('code').value = EXAMPLES[key];
+    document.getElementById('output').textContent = '已加载示例，修改后点击「运行」';
+    document.getElementById('status').textContent = '';
+  }
 }
 </script>
 </body>
