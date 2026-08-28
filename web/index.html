@@ -264,24 +264,34 @@ function runFcl() {
   out.textContent = '⏳ 正在分解…';
   out.className = 'loading';
   st.textContent = '';
-  // 异步运行，避免 UI 卡死
+  // 异步运行 + 超时保护，避免 UI 卡死
+  const timer = setTimeout(() => {
+    out.textContent = '⏳ 正在分解…';
+    st.textContent = '⏱ >5s | 解释器仍在运行，请检查代码是否有死循环';
+  }, 5000);
   setTimeout(() => {
-    const t0 = performance.now();
-    const input  = Module.stringToNewUTF8(src);
-    const output = Module._fcl_run(input);
-    const result = Module.UTF8ToString(output);
-    const ms     = (performance.now() - t0).toFixed(1);
-    Module._free(input);
-
-    out.textContent = result;
-    // 错误行标红
-    if (/\[FCL-\d+\]/.test(result) || /ERROR|错误|异常/.test(result)) {
+    try {
+      const t0 = performance.now();
+      const input  = Module.stringToNewUTF8(src);
+      const output = Module._fcl_run(input);
+      const result = Module.UTF8ToString(output);
+      const ms     = (performance.now() - t0).toFixed(1);
+      Module._free(input);
+      clearTimeout(timer);
+      out.textContent = result;
+      if (/\[FCL-\d+\]/.test(result) || /ERROR|错误|异常/.test(result)) {
+        out.className = 'error';
+        st.textContent = '⏱ ' + ms + 'ms | ❌ 运行出错 — 详见上方错误信息';
+      } else {
+        out.className = 'ok';
+        st.textContent = '⏱ ' + ms + 'ms | ✅ 运行完毕';
+      }
+    } catch(e) {
+      clearTimeout(timer);
+      out.textContent = '[FCL-WEB] WASM 异常: ' + e.message + '\n可能是代码死循环或解释器内部错误';
       out.className = 'error';
-    } else {
-      out.className = 'ok';
+      st.textContent = '❌ WASM 异常';
     }
-    st.textContent = '⏱ ' + ms + 'ms | ' +
-      (out.className === 'error' ? '❌ 运行出错' : '✅ 运行完毕');
   }, 10);
 }
 
