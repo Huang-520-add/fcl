@@ -86,9 +86,13 @@ foodchain-lang/
 │   └── main.cpp             # C++17 解释器（单文件参考实现，~750 行）
 ├── docs/
 │   ├── FCL_TUTORIAL.md      # ★ 官方教学书 v2.4（零基础预备课+12课+输出对照+练习）
+│   ├── FCL_TUTORIAL_CN.md   # ★ 超详细中文教学书 v2.4（保姆级讲解）
+│   ├── FCL_TUTORIAL_EN.md   # ★ Official FCL Textbook v2.4 (English)
 │   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.4（语法/指令/类型/GC）
+│   ├── FCL_REFERENCE_EN.md  # ★ Official FCL Reference v2.4 (English)
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
-│   └── FCL_SPEC.md          # 官方技术规范 v2.4
+│   ├── FCL_SPEC.md          # 官方技术规范 v2.4
+│   └── FCL_SYNTAX.md        # 语法规范 EBNF（含完整词法/语法/错误码矩阵）
 ├── tests/
 │   └── run_tests.sh         # 全量测试脚本（22 用例）
 └── examples/
@@ -109,8 +113,9 @@ foodchain-lang/
 
 ## 文档
 
-- **官方教学书** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)：**零基础也能读**——预备课讲清编程/ASCII/报错，每课含生态小课堂、逐行讲解、**输出对照表（编码→数值）**、练习，附 ASCII 速查表与词汇表 ★ 学习用
-- **官方参考手册** [FCL_REFERENCE.md](docs/FCL_REFERENCE.md)：全部语法/指令/类型/GC/错误表 ★ 查阅用
+- **官方教学书** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)（[中文版](docs/FCL_TUTORIAL_CN.md)，[English](docs/FCL_TUTORIAL_EN.md)）：**零基础也能读**——预备课讲清编程/ASCII/报错，每课含生态小课堂、逐行讲解、**输出对照表**、练习，附词汇表 ★ 学习用
+- **官方参考手册** [FCL_REFERENCE.md](docs/FCL_REFERENCE.md)（[English](docs/FCL_REFERENCE_EN.md)）：全部语法/指令/类型/GC/错误表 ★ 查阅用
+- **语法规范** [FCL_SYNTAX.md](docs/FCL_SYNTAX.md)：完整 EBNF 语法规范、词法 token、营养级约束矩阵、关键字→错误码映射
 - **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)：食物链金字塔、10 个在册物种、族群结构、命名规范
 - **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)：完整语法、指令集、GC 规则、错误对照表
 
@@ -143,3 +148,4 @@ foodchain-lang/
 > FCL（FoodChain Language）是一门口语化的生态学编程语言。程序必须按 BIOME（引种）→ FOODWEB（捕食）→ DECAY（分解）三段式组织。变量是生态圈在册物种（10 个代表物种、5 个营养级），命名强制遵循族群结构：群居物种（狼/狮/羊）有首领 Alpha_Wolf 与性别编号成员 Wolf_M1/Sheep_F2，独居物种（虎/狐/兔）用 Tiger_1 编号。运算通过 DEVOURS（捕食）完成，捕食者与猎物营养级必须恰好相差 1，每次捕食强制征收 20% 能量传递税（林德曼定律），可用首行 GMO ENABLED 豁免（代价是输出携带 🧬 转基因标识）。语言没有传统 if/for：分支由 SEASON（湿度驱动的雨季/旱季二选一）、循环由 MIGRATION（固定次数+开方衰减）与 HIBERNATION（冬眠到条件 FULL 才醒）驱动，多路选择由 MUTATION（运行时随机改写物种名的 CASE）实现；v2.0 加入 ASSESS（生态位评估=数值比较）、SYMBIOSIS/COMPETITION/MIMICRY（布尔逻辑 AND/OR/NOT），语言图灵完备。垃圾回收模拟生态分解：只有能量耗尽的"尸体"（value==0）闲置 3 条指令才会被分解，真实模式下回收时随机阻塞 100ms~1000ms（代码模式即时回收）。输出（ROT）只能由分解者执行，按 ASCII 解释数值。
 
 **有趣事实**：FCL 的"Hello World"会输出退格符——它计算的是 3+5=8，而 ASCII 8 恰好是退格。FCL 的斐波那契靠 CLONE（无性繁殖）突破"能量只能单向流动"的金字塔定律——生态学上，这是物质循环。生态圈外命名会被拒绝："🌿 外来物种入侵，生态圈不予接纳！"——连变量名都要过海关。
+
