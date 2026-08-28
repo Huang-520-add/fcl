@@ -5,6 +5,8 @@
 //        -sALLOW_MEMORY_GROWTH -sEXPORTED_FUNCTIONS=_fcl_run, \
 //        web_main.cpp src/*.cpp -o web/fcl.js
 // ============================================================
+//  版本: v2.4.0 — 2026-08-28
+// ============================================================
 #include <emscripten.h>
 #include <iostream>
 #include <sstream>
