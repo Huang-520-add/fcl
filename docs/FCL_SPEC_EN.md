@@ -26,7 +26,7 @@ FCL (FoodChain Language) is an esoteric programming language (Esolang) designed 
 Core educational goals:
 - Let biology students bypass traditional programming-syntax barriers and write logic directly with familiar food-chain knowledge.
 - Turn every variable assignment into a "bite", every loop into a "migration", forcing memorization of trophic-level order.
-- Through mechanisms like the "energy-transfer tax (20%)" and "gastric-ulcer overflow", intuitively feel ecological thermodynamic laws manifest in computation.
+- Through mechanisms like the "energy-transfer efficiency (20%)" and "gastric-ulcer overflow", intuitively feel ecological thermodynamic laws manifest in computation.
 
 Use cases: interdisciplinary course design for middle-school biology and IT; fun experiments for university general-programming courses; auxiliary tool for ecological-modeling teaching.
 Non-use cases: production environments, financial systems, spacecraft control, and other serious engineering scenarios.
@@ -164,7 +164,7 @@ FCL has no traditional if/for; all logic is driven by environmental keywords:
 - **Loop**: `MIGRATION <species> OVER <count> { ... }`
   Each iteration, the species' energy value auto-decays by square root (simulating long-distance migration cost).
 - **Multi-way selection**: `MUTATION <variable> { CASE "trait": ... }`
-  The variable name is randomly replaced at runtime with a mutant name (e.g., Wolf → Wolv, Grass → Grasse, Tiger → Tygre; full table in the Ecology Field Guide), with a 1/3 mutation probability, detectable via MATCH().
+  The species mutates at runtime with 1/3 probability: its root name is replaced by a mutant name (e.g., Wolf → Wolv, Grass → Grasse, Tiger → Tygre; full table in the Ecology Field Guide), and in-block references are rewritten accordingly (original names are restored after the block); when triggered, exactly one CASE branch is expressed uniformly at random, otherwise the block is a no-op; detectable via MATCH() by species root name.
 
 ## 7. Garbage Collection
 

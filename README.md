@@ -24,7 +24,7 @@ DECAY { ... }    ← 分解段：输出与内存回收
 - **变量 = 生态圈在册物种**：10 个代表物种，5 个营养级（详见 [生态圈图鉴](docs/FCL_ECOLOGY.md)）
 - **族群结构**：独居（虎/狐/兔）用编号；群居（狼/狮/羊）有首领（`Alpha_Wolf` 狼王）和带性别标签的成员（`Wolf_M1` 雄性1号、`Sheep_F2` 雌性2号）
 - 运算 = 捕食：`捕食者 DEVOURS 猎物 USING 算法`，**营养级必须恰好差 1**
-- 每次捕食扣 **20% 能量传递税**（林德曼定律）
+- 每次捕食仅 **20% 能量**流向捕食者（林德曼定律的传递效率，其余 80% 散失）
 - 没有 `if` / `for`，只有 `SEASON`（雨季/旱季）、`MIGRATION`（迁徙）、`HIBERNATION`（冬眠）、`MUTATION`（变异）
 - 分解者只分解"尸体"（能量耗尽的变量）；活体（能量>0）不受分解威胁
 - **图灵完备**：ASSESS（比较）+ HIBERNATION（条件循环）+ INTRODUCE（无限存储）
@@ -40,7 +40,7 @@ DECAY { ... }    ← 分解段：输出与内存回收
 ```bash
 make build            # 编译（g++ -std=c++17 -O2）
 ./fcl examples/example3.fc   # 输出: 🧬A🧬U+0041
-make test             # 全量 42 用例 + 24 条输出断言测试
+make test             # 全量 43 用例 + 25 条输出断言测试
 ```
 
 ```foodchain
@@ -78,7 +78,7 @@ ROT Fungus_1 TO STDOUT ;
 | 分支 | `SEASON RAIN { } DRY { }` | 雨季/旱季（湿度驱动） |
 | 定次循环 | `MIGRATION 物种 OVER n { }` | 迁徙（能量开方衰减） |
 | 条件循环 | `HIBERNATION 物种 UNTIL C { }` | 冬眠（直到春天才醒） |
-| 多路选择 | `MUTATION 物种 { CASE "特征": }` | 基因变异 |
+| 多路选择 | `MUTATION 物种 { CASE "特征": }` | 基因变异（触发时随机表达一支） |
 | 手动回收 | `EXTINCTION 物种 ;` | 灭绝（附内存遗照） |
 | 注释 | `OBSERVATION: 日期, Lat:.., Lon:.., 内容` | 科考记录 |
 
@@ -112,13 +112,13 @@ fcl/
 │   ├── FCL_SYNTAX_EN.md     # Syntax Specification EBNF (English)
 │   └── ESOLANGS_SUBMISSION.md # esolangs.org 词条投稿素材（英文）
 ├── tests/
-│   ├── run_tests.sh         # 黑盒退出码测试（38 用例，随 examples/ 自动增减）
-│   └── output_tests.sh      # 白盒输出断言测试（24 条断言）
+│   ├── run_tests.sh         # 黑盒退出码测试（43 用例，随 examples/ 自动增减）
+│   └── output_tests.sh      # 白盒输出断言测试（25 条断言）
 ├── web/
 │   └── index.html           # 在线 Playground（根 index.html 跳转至此；fcl.js/fcl.wasm 由 CI 编译）
-└── examples/                # 42 个用例
+└── examples/                # 43 个用例
     ├── example1.fc          # 附录示例 1（3+5=8，输出退格符 + U+0008）
-    ├── example2.fc          # 附录示例 2（20% 能量税演示）
+    ├── example2.fc          # 附录示例 2（20% 能量传递效率演示）
     ├── example3.fc          # 附录示例 3（输出 'A' + U+0041，推荐）
     ├── fib.fc               # 斐波那契递推（MIGRATION + CLONE）
     ├── math_factorial.fc    # ★ 实战：阶乘 5!=120（输出 'x'）
@@ -169,7 +169,7 @@ fcl/
 
 **语言概述**（esolangs.org 条目正文建议）：
 
-> FCL（FoodChain Language）是一门口语化的生态学编程语言。程序必须按 BIOME（引种）→ FOODWEB（捕食）→ DECAY（分解）三段式组织。变量是生态圈在册物种（10 个代表物种、5 个营养级），命名强制遵循族群结构：群居物种（狼/狮/羊）有首领 Alpha_Wolf 与性别编号成员 Wolf_M1/Sheep_F2，独居物种（虎/狐/兔）用 Tiger_1 编号。运算通过 DEVOURS（捕食）完成，捕食者与猎物营养级必须恰好相差 1，每次捕食强制征收 20% 能量传递税（林德曼定律），可用首行 GMO ENABLED 豁免（代价是输出携带 🧬 转基因标识）。语言没有传统 if/for：分支由 SEASON（湿度驱动的雨季/旱季二选一）、循环由 MIGRATION（固定次数+开方衰减）与 HIBERNATION（冬眠到条件 FULL 才醒）驱动，多路选择由 MUTATION（运行时随机改写物种名的 CASE）实现；v2.0 加入 ASSESS（生态位评估=数值比较）、SYMBIOSIS/COMPETITION/MIMICRY（布尔逻辑 AND/OR/NOT），语言图灵完备。垃圾回收模拟生态分解：只有能量耗尽的"尸体"（value==0）闲置 3 条指令才会被分解，真实模式下回收时随机阻塞 100ms~1000ms（代码模式即时回收）。输出（ROT）只能由分解者执行，按 ASCII 解释数值。
+> FCL（FoodChain Language）是一门口语化的生态学编程语言。程序必须按 BIOME（引种）→ FOODWEB（捕食）→ DECAY（分解）三段式组织。变量是生态圈在册物种（10 个代表物种、5 个营养级），命名强制遵循族群结构：群居物种（狼/狮/羊）有首领 Alpha_Wolf 与性别编号成员 Wolf_M1/Sheep_F2，独居物种（虎/狐/兔）用 Tiger_1 编号。运算通过 DEVOURS（捕食）完成，捕食者与猎物营养级必须恰好相差 1，每次捕食仅 20% 能量流向捕食者（林德曼定律的传递效率），可用首行 GMO ENABLED 豁免（100% 传递，代价是输出携带 🧬 转基因标识）。语言没有传统 if/for：分支由 SEASON（湿度驱动的雨季/旱季二选一）、循环由 MIGRATION（固定次数+开方衰减）与 HIBERNATION（冬眠到条件 FULL 才醒）驱动，多路选择由 MUTATION 实现（1/3 概率物种变异改名，块内引用随之改写并随机表达一个 CASE 分支，MATCH() 可检测）；v2.0 加入 ASSESS（生态位评估=数值比较）、SYMBIOSIS/COMPETITION/MIMICRY（布尔逻辑 AND/OR/NOT），语言图灵完备。垃圾回收模拟生态分解：只有能量耗尽的"尸体"（value==0）闲置 3 条指令才会被分解，真实模式下回收时随机阻塞 100ms~1000ms（代码模式即时回收）。输出（ROT）只能由分解者执行，按 ASCII 解释数值。
 
 **有趣事实**：FCL 的"Hello World"会输出退格符——它计算的是 3+5=8，而 ASCII 8 恰好是退格。FCL 的斐波那契靠 CLONE（无性繁殖）突破"能量只能单向流动"的金字塔定律——生态学上，这是物质循环。生态圈外命名会被拒绝："🌿 外来物种入侵，生态圈不予接纳！"——连变量名都要过海关。
 

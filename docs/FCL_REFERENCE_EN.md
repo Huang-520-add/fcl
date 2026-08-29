@@ -16,7 +16,7 @@ The core re-mapping:
 | Ordinary concept | FCL ecology equivalent |
 |---|---|
 | Variable | Registered species in the ecosystem (10 species, bound to a trophic level) |
-| Assignment / computation | Devouring (DEVOURS) — one-way, destructive, with energy tax |
+| Assignment / computation | Devouring (DEVOURS) — one-way, destructive, 20% energy-transfer efficiency |
 | Copy without destroy | Asexual reproduction (CLONE) |
 | Comparison | Ecological niche assessment (ASSESS) |
 | Boolean logic | Symbiosis / Competition / Mimicry (SYMBIOSIS / COMPETITION / MIMICRY) |
@@ -32,7 +32,7 @@ The core re-mapping:
 
 | FCL feature | Real ecology basis |
 |---|---|
-| 20% energy tax per devour | **Lindeman's Law**: ~10–20% energy transfer efficiency per trophic level; rest lost as heat, respiration |
+| 20% energy-transfer efficiency per devour | **Lindeman's Law**: ~10–20% energy transfer efficiency per trophic level; rest lost as heat, respiration |
 | Prey energy becomes 0 after devour | Energy flow is strictly one-way: energy entering a consumer does not return to the prey |
 | Decomposer 100% recovery, any level | Decomposers (detritivores) completely break down organic matter; no residual energy waste |
 | Only decomposers can ROT | Nutrients must be mineralized by decomposers before returning to the environment |
@@ -244,16 +244,31 @@ Conditional loop (while). Loops until APEX = FULL(1). **Side effect**: each roun
 ### 6.11 Mutation (MUTATION)
 
 ```foodchain
-MUTATION <species> { CASE "feature": <statement> ... } ;
+MUTATION <species-or-member-name> { CASE "feature": <statement> ... } ;
 ```
 
-Runtime: the species name has 1/3 probability of mutating to an alternate form (Wolf→Wolv, Sheep→Sheepe, etc.). All statements inside referencing the mutated species change accordingly. `MATCH(name)` detects mutation.
+The **species** mutates with 1/3 probability: its root name is replaced by an alternate form (Wolf→Wolv, Sheep→Sheepe, Tiger→Tygre, Bacillus→Bacilluz; all 10 registered species — see the Ecology Field Guide). Effects of a mutation:
+
+- **Species-level renaming**: for the duration of the block, every registered member of the species is temporarily renamed (`Wolf_M1`→`Wolv_M1`, `Alpha_Wolf`→`Alpha_Wolv`), and references inside the block are rewritten accordingly; original names are restored after the block, so outside references are unaffected
+- **Branch selection**: when triggered, one `CASE` branch is expressed, chosen **uniformly at random**; if not triggered, the whole block is a no-op (`MUTATION ≈ switch + random case`)
+- **Detectable**: `MATCH(name)` resolves by species root name (root, member, or mutated name all work) and the record persists across blocks
+
+Note: mutated names (e.g. `Wolv`) are not in the ecosystem registry and cannot be `INTRODUCE`d.
 
 Mutated names:
 
 | Original | Mutated |
 |---|---|
-| Grass | Grasse | Algae | Algue | Sheep | Sheepe | Rabbit | Rabbitt | Wolf | Wolv | Fox | Faux | Tiger | Tygre | Lion | Lioon | Fungus | Fingu | Bacillus | Bacilluz |
+| Grass | Grasse |
+| Algae | Algee |
+| Sheep | Sheepe |
+| Rabbit | Rabbite |
+| Wolf | Wolv |
+| Fox | Foxy |
+| Tiger | Tygre |
+| Lion | Lyone |
+| Fungus | Funge |
+| Bacillus | Bacilluz |
 
 ### 6.12 Extinction (EXTINCTION)
 
@@ -352,7 +367,7 @@ All errors are structured: `[error_code @line] ecological message` (since v2.2).
 | File | Demonstrates |
 |---|---|
 | `../examples/example1.fc` | 3+5=8 (backspace char + U+0008) |
-| `../examples/example2.fc` | 20% energy tax (65×0.2=13) |
+| `../examples/example2.fc` | 20% energy-transfer efficiency (65×0.2=13) |
 | `../examples/example3.fc` | GMO no-tax output 'A' + U+0041 |
 | `../examples/fib.fc` | Fibonacci (CLONE substance cycling) |
 | `../examples/plus1.fc` | 1+1 (ASCII control character version) |

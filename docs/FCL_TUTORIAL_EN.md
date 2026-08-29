@@ -253,7 +253,7 @@ DECAY {                                    ← [9] DECAY begins
 
 - `GMO` = Genetically Modified Organism
 - `ENABLED` = turned on
-- What it does: disables the 20% energy tax (more on this in Lesson 5). Without this, a herbivore only gets 20% of what it eats. With GMO, it gets 100%.
+- What it does: waives the energy-transfer loss (more on this in Lesson 5). Without this, a herbivore only gets 20% of what it eats. With GMO, it gets 100%.
 - Side effect: outputs will have a 🧬 label in front (like a GMO food label).
 - You can skip this line, but then your math won't add up correctly.
 
@@ -699,11 +699,11 @@ Sheep_M1 DEVOURS Grass_1 USING SUM ;
 
 ---
 
-# 🌿 Lesson 5: The Energy Tax and GMO — Why Does Eating Cost 20%?
+# 🌿 Lesson 5: The Energy Tax and GMO — Why Do You Only Keep 20% of a Meal?
 
 > **Goals for this lesson:**
 > 1. Understand Lindeman's Law (the 10% rule in real ecology)
-> 2. Know why FCL defaults to 20% energy loss per devour
+> 2. Know why FCL defaults to 20% energy transfer per devour
 > 3. Use GMO ENABLED to bypass the tax
 
 ---
@@ -723,7 +723,7 @@ Example:
 
 ---
 
-## 5.2 FCL's Energy Tax: 20%
+## 5.2 FCL's Energy Tax: 80% Levied, 20% Kept
 
 **By default: every devour only transfers 20% of the prey's energy to the predator.**
 
@@ -760,7 +760,7 @@ FOODWEB {
 ```
 
 ### GMO's benefits:
-- ✅ 100% energy transfer (no 20% loss)
+- ✅ 100% energy transfer (tax waived)
 - ✅ Predictable results (no tax distortion)
 - ✅ Great for precise algorithms (Fibonacci, factorial, etc.)
 
@@ -1315,6 +1315,14 @@ Ecological meaning: Genetic mutations are random and unpredictable — they're t
 
 > **Programmer's equivalent**: `MUTATION` ≈ `switch` + random case + `MATCH()` detection
 
+**What happens when MUTATION triggers:**
+
+1. **Species-level renaming**: for the duration of the block, every registered member of that species is temporarily renamed (`Wolf_M1` → `Wolv_M1`, `Alpha_Wolf` → `Alpha_Wolv`), and references inside the block are rewritten accordingly; original names are restored after the block, so outside references are unaffected
+2. **One random case is expressed**: a single `CASE` branch is chosen uniformly at random and executed (if mutation doesn't trigger, the whole block is a no-op)
+3. **Mutation is detectable**: `MATCH(Wolf)` / `MATCH(Wolf_M1)` / `MATCH(Wolv_M1)` all return 1, and the record persists across blocks
+
+Note: mutated names (like `Wolv`) are not in the ecosystem registry — you can't `INTRODUCE` them. A mutant is an alien to the ecosystem.
+
 ---
 
 ## 12.2 The 10 Mutated Names
@@ -1322,14 +1330,14 @@ Ecological meaning: Genetic mutations are random and unpredictable — they're t
 | Original | Mutated |
 |---|---|
 | Grass | Grasse |
-| Algae | Algue |
+| Algae | Algee |
 | Sheep | Sheepe |
-| Rabbit | Rabbitt |
+| Rabbit | Rabbite |
 | Wolf | Wolv |
-| Fox | Faux |
+| Fox | Foxy |
 | Tiger | Tygre |
-| Lion | Lioon |
-| Fungus | Fingu |
+| Lion | Lyone |
+| Fungus | Funge |
 | Bacillus | Bacilluz |
 
 ---
@@ -1337,10 +1345,10 @@ Ecological meaning: Genetic mutations are random and unpredictable — they're t
 ## 12.3 MATCH() — Detecting Mutations
 
 ```foodchain
-MATCH(Wolf_M1)   // Returns 1 if Wolf_M1 mutated to Wolv_M1; 0 if unchanged
+MATCH(Wolf_M1)   // Returns 1 if the Wolf species mutated to Wolv at runtime; 0 if unchanged
 ```
 
-Use `MATCH()` inside expressions to make decisions based on whether mutation occurred.
+MATCH() resolves by species root name, so `MATCH(Wolf)`, `MATCH(Wolf_M1)` and `MATCH(Wolv_M1)` are all equivalent. Use `MATCH()` inside expressions to make decisions based on whether mutation occurred.
 
 ---
 

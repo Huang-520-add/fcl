@@ -175,8 +175,11 @@ hibernation   ::= "HIBERNATION" identifier "UNTIL" apexVariable block
 
 mutation      ::= "MUTATION" identifier "{" caseClause+ "}"
 caseClause    ::= "CASE" stringLiteral ":" statement+
-                 // at runtime the identifier has a 1/3 probability of mutating (renaming)
-                 // detectable via MATCH(identifier)
+                 // at runtime the species has a 1/3 probability of mutating (root-name
+                 // renaming; in-block references are rewritten accordingly)
+                 // when triggered, exactly one caseClause is expressed, chosen uniformly
+                 // at random; otherwise the whole block is a no-op
+                 // detectable via MATCH(identifier) (resolved by species root name)
 ```
 
 ### 2.10 Extinction

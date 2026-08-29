@@ -54,7 +54,7 @@ Names outside the registry are rejected: `🌿 外来物种入侵，生态圈不
 
 - The predator's trophic level must be exactly one above the prey's (a wolf cannot eat grass).
 - Prey is consumed: its energy becomes 0 (unidirectional energy flow).
-- Every predation is taxed 20% (Lindeman's trophic efficiency law). `GMO ENABLED` on the first line waives the tax, at the cost of a 🧬 GMO label on every output.
+- Each predation transfers only 20% of the energy to the predator (Lindeman's trophic efficiency law). `GMO ENABLED` on the first line waives the loss for 100% transfer, at the cost of a 🧬 GMO label on every output.
 - Only apex predators may multiply (`PROD`) or divide (`QUOT`) — and even then, a parity rule on storage addresses can make the pounce "miss", halving the result.
 
 ### No `if` / `for` — only ecology
@@ -64,7 +64,7 @@ Names outside the registry are rejected: `🌿 外来物种入侵，生态圈不
 | `SEASON RAIN { } DRY { }` | humidity of the last 3 instructions |
 | `MIGRATION sp OVER n { }` | fixed loop; the migrant's energy is square-rooted after each lap |
 | `HIBERNATION sp UNTIL apex { }` | while-loop; the hibernator loses 10% energy per round |
-| `MUTATION sp { CASE "trait": }` | runtime random renaming of the species (1/3 chance) |
+| `MUTATION sp { CASE "trait": }` | runtime random renaming of the species (1/3 chance); when triggered, exactly one CASE branch is expressed at random; detectable via MATCH() |
 | `ASSESS A AGAINST B TO apex` | comparison; result stored in an apex predator |
 | `SYMBIOSIS / COMPETITION / MIMICRY` | boolean AND / OR / NOT (apex-only) |
 

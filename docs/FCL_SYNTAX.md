@@ -175,8 +175,9 @@ hibernation ::= "HIBERNATION" identifier "UNTIL" apexVariable block
 
 mutation     ::= "MUTATION" identifier "{" caseClause+ "}"
 caseClause   ::= "CASE" stringLiteral ":" statement+
-                 // 运行时 identifier 有 1/3 概率变异（改名）
-                 // 可用 MATCH(identifier) 检测
+                 // 运行时该物种有 1/3 概率变异（根名改名，块内引用随之改写）
+                 // 触发时等概率随机表达一个 caseClause；未触发整个块空转
+                 // 可用 MATCH(identifier) 检测（按物种根名判定）
 ```
 
 ### 2.10 灭绝（Extinction）

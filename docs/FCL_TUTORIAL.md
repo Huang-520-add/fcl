@@ -251,7 +251,7 @@ DECAY {                                    ← 【9】DECAY 段开始
 - `GMO` = 转基因（Genetically Modified Organism）
 - `ENABLED` = 启用
 - 意思是：启用转基因模式
-- 为什么要转基因？因为正常情况下，羊吃草会被扣 20% 能量税（林德曼定律）。开转基因后，100% 传递，不扣税。
+- 为什么要转基因？因为正常情况下，羊吃草只能拿到 20% 的能量（林德曼定律的传递效率）。开转基因后，100% 传递，免税。
 - 代价是输出时前面会多一个 🧬 标识（表示"这是转基因产品"）
 
 **第 3 行 `INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;`**
@@ -699,11 +699,11 @@ Sheep_M1 DEVOURS Grass_1 USING SUM ;
 
 ---
 
-# 📗 第 5 课：能量税与 GMO——为什么捕食会扣 20%？
+# 📗 第 5 课：能量税与 GMO——为什么到手的能量只有 20%？
 
 > **读完这课你将学会：**
 > 1. 理解林德曼定律（生态学 10% 定律）
-> 2. 理解为什么 FCL 默认扣 20%
+> 2. 理解为什么 FCL 默认只有 20% 能量到账
 > 3. 掌握 GMO ENABLED 的用法和代价
 
 ---
@@ -725,7 +725,7 @@ Sheep_M1 DEVOURS Grass_1 USING SUM ;
 
 ---
 
-## 5.2 FCL 的能量税：20%
+## 5.2 FCL 的能量税：税率 80%，到手 20%
 
 FCL 默认：**每次捕食（DEVOURS），捕食者只能获得猎物的 20% 能量。**
 
@@ -765,7 +765,7 @@ FOODWEB {
 ```
 
 ### GMO 的好处：
-- ✅ 能量 100% 传递（不扣 20% 税）
+- ✅ 能量 100% 传递（免税）
 - ✅ 计算结果可预测（不受税的影响）
 - ✅ 适合需要精确数值的算法（斐波那契、阶乘等）
 
@@ -1337,6 +1337,14 @@ MIMICRY Lion_M1 TO Tiger_1 ;
 
 > **程序员视角**：`MUTATION` ≈ `switch` + 随机 case + `MATCH()` 检测
 
+**MUTATION 触发时会发生什么：**
+
+1. **物种级改名**：块执行期间，该物种全部在册成员临时改名（`Wolf_M1` → `Wolv_M1`、`Alpha_Wolf` → `Alpha_Wolv`），块内对该物种的引用随之改写；块结束后恢复原名，块外引用不受影响
+2. **随机表达一支**：从所有 `CASE` 分支中等概率随机选一支执行（不触发则整个块空转）
+3. **变异可检测**：`MATCH(Wolf)` / `MATCH(Wolf_M1)` / `MATCH(Wolv_M1)` 均返回 1，且记录跨块持续存在
+
+注意：变异名（如 `Wolv`）不在生态圈在册名录中，不能用于 `INTRODUCE` 引种——变异体是生态圈的外来者。
+
 ---
 
 ## 12.2 10 个物种的变异名
@@ -1344,14 +1352,14 @@ MIMICRY Lion_M1 TO Tiger_1 ;
 | 原名 | 变异名 |
 |---|---|
 | Grass | Grasse |
-| Algae | Algue |
+| Algae | Algee |
 | Sheep | Sheepe |
-| Rabbit | Rabbitt |
+| Rabbit | Rabbite |
 | Wolf | Wolv |
-| Fox | Faux |
+| Fox | Foxy |
 | Tiger | Tygre |
-| Lion | Lioon |
-| Fungus | Fingu |
+| Lion | Lyone |
+| Fungus | Funge |
 | Bacillus | Bacilluz |
 
 ---
@@ -1363,6 +1371,7 @@ GMO ENABLED ;
 NUMERIC OUTPUT ;
 BIOME {
     INTRODUCE Wolf_M1  AS CARNIVORE WITH 50 ;
+    INTRODUCE Sheep_M1 AS HERBIVORE WITH 30 ;
     INTRODUCE Tiger_1  AS APEX WITH 0 ;
     INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
 }
@@ -1378,6 +1387,8 @@ DECAY {
     ROT Fungus_1 TO STDOUT ;
 }
 ```
+
+运行说明：变异触发（1/3）时随机表达一支——"正常"则 `Wolf_M1 = 50+30 = 80`（GMO 免税），"长毛"则 `Wolf_M1 = 50-30 = 20`；未触发（2/3）时块空转，`Wolf_M1` 保持 50。三种结局下 `Fungus_1 DEVOURS Wolf_M1`（DECAY 内分解者免税）分别得到 80 / 20 / 50。
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## 1. Food Chain Pyramid (Trophic-Level Priority)
 
-Energy flows **one-way** along trophic levels: lower levels are preyed upon by higher levels, with a 20% loss per transfer (energy-transfer tax). Decomposers recycle everything and complete the matter cycle through CLONE.
+Energy flows **one-way** along trophic levels: lower levels are preyed upon by higher levels, with only 20% of the energy reaching the next level per transfer (Lindeman's transfer efficiency; the rest is lost). Decomposers recycle everything and complete the matter cycle through CLONE.
 
 ```
          ┌─────────────────────────┐
@@ -89,7 +89,7 @@ Colonies and clusters also use numbered individuals:
 | Instruction | Ecological event | Corresponding capability |
 |---|---|---|
 | `INTRODUCE <species> AS <trophicLevel> WITH <energy> ;` | Introduction | Variable declaration |
-| `<predator> DEVOURS <prey> USING <algorithm> ;` | Predation (SUM/DIFF/PROD/QUOT) | Arithmetic + 20% energy tax |
+| `<predator> DEVOURS <prey> USING <algorithm> ;` | Predation (SUM/DIFF/PROD/QUOT) | Arithmetic (result ×0.2, 20% energy-transfer efficiency) |
 | `CLONE <target> FROM <source> ;` | Asexual reproduction | Copy |
 | `SPROUT <producer> FROM STDIN ;` | Photosynthetic capture | Input |
 | `ROT <decomposer> TO STDOUT ;` | Decomposition / mineralization | Output |
@@ -162,7 +162,7 @@ Decomposers are the ecosystem's "scavengers", but **they only decompose corpses,
 ## 6. Philosophy of Ecological-Tier Simulation
 
 Every line of FCL code is an ecological event; every run is an ecological succession:
-- **Energy** flows one-way (Second Law of Thermodynamics → 20% energy tax)
+- **Energy** flows one-way (Second Law of Thermodynamics → only 20% transferred per level)
 - **Matter** cycles (decomposers → CLONE feeds back to lower trophic levels)
 - **Species** have social structure (Alpha leader dominance, male/female division of labor, generational number turnover)
 - **Environment** drives fate (rainy/dry seasons, migration cost, hibernation dormancy, genetic mutation)
