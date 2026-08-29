@@ -81,6 +81,9 @@
   }
   button:hover { background:var(--dark); }
   button:disabled { background:#aaa; cursor:not-allowed; }
+  button.secondary { background:#fff; color:var(--green); border:1px solid var(--green); }
+  button.secondary:hover { background:#f0f7f0; }
+  body.dark button.secondary { background:#1e1e2e; color:#7ee8c7; border-color:#7ee8c7; }
   select, input[type="range"] {
     padding:6px 10px; border-radius:6px; border:1px solid #ccc;
     font-size:13px;
@@ -134,6 +137,7 @@ ROT Fungus_1 TO STDOUT ;
     </div>
     <div class="toolbar">
       <button id="btn-run" onclick="runFcl()">▶ 运行</button>
+      <button id="btn-share" class="secondary" onclick="shareCode()" title="把当前代码编码进链接，发给别人即可还原">🔗 分享</button>
       <select id="examples" onchange="loadExample()">
         <option value="">— 加载示例 —</option>
         <option value="example3">example3.fc（输出 'A'）</option>
@@ -437,7 +441,40 @@ function loadExample() {
   }
 }
 
-// 初始高亮
+// ---- 分享链接（代码编码进 URL hash，打开即还原）----
+function shareCode() {
+  const src = document.getElementById('code').value;
+  const st = document.getElementById('status');
+  try {
+    const b64 = btoa(unescape(encodeURIComponent(src)));  // UTF-8 安全 base64
+    const url = location.origin + location.pathname + '#c=' + b64;
+    history.replaceState(null, '', '#c=' + b64);
+    const done = () => { st.textContent = '🔗 分享链接已复制到剪贴板'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(() => prompt('复制此链接分享：', url));
+    } else {
+      prompt('复制此链接分享：', url);
+    }
+  } catch (e) {
+    st.textContent = '❌ 分享失败：' + e.message;
+  }
+}
+function loadFromHash() {
+  const m = location.hash.match(/^#c=([A-Za-z0-9+/=]+)/);
+  if (!m) return;
+  try {
+    const src = decodeURIComponent(escape(atob(m[1])));
+    if (src.trim()) {
+      document.getElementById('code').value = src;
+      const out = document.getElementById('output');
+      out.textContent = '已从分享链接还原代码，点击「运行」开始推演…';
+      out.className = '';
+    }
+  } catch (e) { /* 非法分享链接，静默忽略 */ }
+}
+
+// 初始高亮 + 分享还原
+loadFromHash();
 updateHighlight();
 </script>
 </body>
