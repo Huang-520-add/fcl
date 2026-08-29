@@ -79,7 +79,7 @@ ROT Fungus_1 TO STDOUT ;
 ## 仓库结构
 
 ```
-foodchain-lang/
+fcl/
 ├── LICENSE                  # MIT
 ├── README.md                # 本文件
 ├── Makefile                 # make build / make test / make clean
