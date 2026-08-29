@@ -5,7 +5,8 @@ set -u
 cd "$(dirname "$0")/.."
 
 BIN=./fcl
-if [ ! -x "$BIN" ]; then
+[ ! -x "$BIN" ] && [ -f ./fcl.exe ] && BIN=./fcl.exe   # Windows 构建产物
+if [ ! -x "$BIN" ] && [ ! -f "$BIN" ]; then
     echo "未找到解释器，请先执行: make build"
     exit 1
 fi

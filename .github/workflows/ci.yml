@@ -55,11 +55,7 @@ jobs:
 
       - name: 输出断言测试（白盒：验证关键用例的实际输出内容）
         shell: bash
-        run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            cp fcl.exe fcl
-          fi
-          bash tests/output_tests.sh
+        run: bash tests/output_tests.sh
 
       - name: 示例冒烟（可见输出验证）
         shell: bash
