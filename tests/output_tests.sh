@@ -77,6 +77,7 @@ assert_output "edge_nested_migration.fc" "🧬1"       # 嵌套 MIGRATION（双�
 assert_output "edge_assess_equal.fc" "FULL" "🧬1"    # ASSESS 相等判 FULL（>=）
 assert_output "edge_clone_chain.fc" "🧬42"           # CLONE 跨营养级链式复制
 assert_output "edge_season_wet.fc" "🧬7"             # 湿度≥2 走 RAIN 分支
+assert_output "edge_mutation_rename.fc" "44"         # MUTATION 物种级改名 + MATCH 不变量（触发与否输出恒 44）
 
 echo "输出断言测试通过: $pass / 失败: $fail"
 [ "$fail" -eq 0 ]
