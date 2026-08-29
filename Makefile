@@ -21,6 +21,7 @@ $(TARGET): $(OBJS)
 
 test: build
 	bash tests/run_tests.sh
+	bash tests/output_tests.sh
 
 clean:
 	rm -f $(TARGET) $(OBJS)
