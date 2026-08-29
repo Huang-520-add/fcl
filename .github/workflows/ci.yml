@@ -33,7 +33,7 @@ jobs:
             g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -o fcl $SRCS
           fi
 
-      - name: 全量测试（26 用例）
+      - name: 全量测试（examples/ 下全部 .fc 用例，随文件数自动增减）
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
