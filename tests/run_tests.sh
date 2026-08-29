@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# FCL 全量测试脚本
+# FCL 全量测试脚本（黑盒：退出码）
 # 预期：正常用例退出码 0；err_* 与 control_season_dry 退出码 1
+# stdin 接 /dev/null：避免交互式 SCENT/HIBERNATION 组合在终端上挂起
 set -u
 cd "$(dirname "$0")/.."
 
@@ -14,7 +15,7 @@ fi
 pass=0
 fail=0
 for f in examples/*.fc; do
-    if "$BIN" "$f" >/dev/null 2>&1; then ec=0; else ec=1; fi
+    if "$BIN" "$f" </dev/null >/dev/null 2>&1; then ec=0; else ec=1; fi
     case "$f" in
         *err_*|*control_season_dry*) want=1 ;;
         *) want=0 ;;

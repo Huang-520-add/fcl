@@ -1,4 +1,4 @@
-# FCL Textbook: The FoodChain Language — English Edition v2.4
+# FCL Textbook: The FoodChain Language — English Edition v3.0
 
 > **The "For Real" Beginner's Guide to FCL**
 >
@@ -359,7 +359,7 @@ Numbers, plain and simple.
    BIOME { ... }    ← ❌ Invalid! BIOME must come first!
    DECAY { ... }
 
-⚠️ Rule 3: FOODWEB must contain at least one DEVOURS
+⚠️ Rule 3: FOODWEB must contain at least one predation act (DEVOURS / SCENT / POUNCE all count)
    No eating → 🌍 Ecosystem collapse (the food chain is broken!)
 ```
 
@@ -1575,5 +1575,5 @@ FCL is Turing complete, but it's not *convenient*:
 
 ---
 
-> Textbook v2.4 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> Textbook v3.0 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Quick Reference: [FCL_REFERENCE.md](FCL_REFERENCE.md) | Ecology Guide: [FCL_ECOLOGY.md](FCL_ECOLOGY.md) | Syntax Spec: [FCL_SYNTAX.md](FCL_SYNTAX.md)

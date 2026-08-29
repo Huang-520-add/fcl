@@ -1,4 +1,4 @@
-# 食物链语言（FCL）官方技术规范 v2.4
+# 食物链语言（FCL）官方技术规范 v3.0
 
 发布机构：国际深奥编程语言基金会（IOEF）
 协议名称：金字塔协议（Trophic Pyramid Protocol）
@@ -52,7 +52,7 @@ BIOME {
 /* 引种段：仅允许变量声明与初始能量注入 */
 }
 FOODWEB {
-/* 捕食段：核心运算逻辑，必须包含至少一次 DEVOURS 操作 */
+/* 捕食段：核心运算逻辑，必须包含至少一次捕食行为（DEVOURS / SCENT / POUNCE） */
 }
 DECAY {
 /* 分解段：负责输出与内存回收 */
@@ -107,10 +107,21 @@ INTRODUCE <标识符> AS <营养级> WITH <能量表达式> ;
 
 豁免条款：程序首行添加 `GMO ENABLED ;` 恢复 100% 效率，但每次 ROT 输出前打印 🧬 转基因产品标识。
 
-### 5.4 输入（SPROUT）
+### 5.4 输入（SCENT/LURK/POUNCE 组合）
 
-只能注入 PRODUCER。语法：`SPROUT <生产者名> FROM STDIN ;`
-控制台播放 2 秒随机音调，程序员需在声音停止前按下空格键"捕捉"数值，超时则输入为 0。
+v3.0 废除单一输入原语 SPROUT（阻塞式读入 PRODUCER）：深奥语言的输入不是一条指令，而是**三个原子行为的组合**——嗅探（SCENT）→ 潜伏（LURK）→ 猛扑（POUNCE），单独一个原语几乎无用，组合起来才能捕获猎物。三个原语**只能出现在 FOODWEB 块内**（捕食/运算的发生地；FOODWEB 有效性校验接受 DEVOURS / SCENT / POUNCE）。
+
+- **SCENT（嗅探，非阻塞）**：`SCENT <嗅探者> TO <APEX变量> ;` —— 探测 STDIN 是否有数据就绪：就绪 → 向 APEX 物种变量存入 1.0，否则存入 0.0。输出 `👃 X 嗅探风中气味 → Y FULL（嗅到猎物）` 或 `HUNGRY（无气味）`。结果变量必须是 APEX 营养级物种（Tiger/Lion）。
+- **LURK（潜伏，休眠等待）**：`LURK <物种> FOR <节拍数> ;` —— 等待 N 拍（真实模式 100ms/拍，代码模式 1ms/拍，钳制 0–600）。输出 `🕳️ X 潜伏 N 拍`。物种必须已注册。
+- **POUNCE（猛扑，非阻塞）**：`POUNCE <捕食者> ;` —— STDIN 就绪 → 读入数值存入该物种（输出 `🦅 X 猛扑命中，捕获能量 N`）；未就绪 → 扑空、能量保持（`🐾 X 扑空（无猎物气味），能量保持`）；EOF/非法输入视为腐坏猎物（`🦠 X 扑到的猎物已腐坏，能量保持`）。WASM/浏览器构建中永远扑空。
+
+组合范式（替代旧 SPROUT）：
+
+```foodchain
+SCENT Wolf_M1 TO Tiger_1 ;
+HIBERNATION Wolf_M1 UNTIL Tiger_1 { LURK Wolf_M1 FOR 10 ; SCENT Wolf_M1 TO Tiger_1 ; }
+POUNCE Wolf_M1 ;
+```
 
 ### 5.5 输出（ROT）
 
@@ -312,7 +323,7 @@ DECAY 输出：ASCII 13（回车符）+ `U+000D`。实测输出：`🧬\r🧬U+0
 - 🐾 扑咬落空，能量减半——APEX 扑咬距离判定
 - 🌩️ RAIN 块语句随机乱序——仅在程序首行 `STORM ENABLED` 后、且块内 >3 条语句时发生
 
-文档版本：v2.4
+文档版本：v3.0
 最后更新：2026-08-27
 
 

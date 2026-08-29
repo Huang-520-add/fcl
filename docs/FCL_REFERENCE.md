@@ -1,4 +1,4 @@
-# FCL 官方参考手册（FCL Language Reference）v2.4
+# FCL 官方参考手册（FCL Language Reference）v3.0
 
 > **代码在吞噬中传递，真理在分解中显现。**
 > 本手册供**查阅**使用：完整定义 FCL 的语法、类型、指令、控制流与垃圾回收。
@@ -50,13 +50,13 @@ FCL 的每条规则都来自真实生态学：
 
 ```
 BIOME   { ... }   // 引种段：仅允许变量声明（INTRODUCE）与能量注入
-FOODWEB { ... }   // 捕食段：核心运算，必须包含至少一次 DEVOURS
+FOODWEB { ... }   // 捕食段：核心运算，必须包含至少一次捕食行为（DEVOURS / SCENT / POUNCE）
 DECAY   { ... }   // 分解段：输出（ROT）与回收（EXTINCTION）
 ```
 
 规则：
 - 三段**必须齐全、顺序不可颠倒**，缺任一段 → `🌍 生态崩溃，食物链断裂！`
-- FOODWEB 必须含 DEVOURS（否则同样报 🌍）
+- FOODWEB 必须含捕食行为：DEVOURS / SCENT / POUNCE 任一（否则同样报 🌍）
 - GMO ENABLED 写在三段式之外（程序首行）
 - 段内语句以 `;` 结尾；复合控制块用 `{ }`
 
@@ -202,13 +202,50 @@ MIMICRY    <A> TO <B> ;            (* B = NOT A，拟态伪装 *)
 
 三个操作数（MIMICRY 为两个）必须全部为 APEX。
 
-### 6.6 输入：SPROUT
+### 6.6 输入：SCENT/LURK/POUNCE（组合原语）
+
+v3.0 将旧的 SPROUT（阻塞式读入 PRODUCER）分解为三个可组合的原子原语——输入不再是一条指令，而是**嗅探 → 潜伏 → 猛扑**的组合技。三个原语只能出现在 FOODWEB 块内（FOODWEB 有效性校验接受 DEVOURS / SCENT / POUNCE）。
+
+**SCENT（嗅探，非阻塞探测 STDIN 就绪性）**
 
 ```ebnf
-SPROUT <生产者名> FROM STDIN ;
+SCENT <嗅探者> TO <APEX变量> ;
 ```
 
-只能注入 PRODUCER（否则 🦴）。控制台播放 2 秒音调，需在时限内输入数值；超时 → 0。
+STDIN 有数据就绪 → 向 APEX 物种变量存入 1.0，否则存入 0.0。输出：
+- `👃 Wolf_M1 嗅探风中气味 → Tiger_1 FULL（嗅到猎物）`（就绪）
+- `👃 Wolf_M1 嗅探风中气味 → Tiger_1 HUNGRY（无气味）`（未就绪）
+
+结果变量必须是 APEX 营养级物种（Tiger/Lion），否则 ⚠️ 分类学混乱。
+
+**LURK（潜伏，休眠等待）**
+
+```ebnf
+LURK <物种> FOR <节拍数> ;
+```
+
+等待 N 拍后继续：真实模式 100ms/拍、代码模式 1ms/拍，节拍数钳制在 0–600。输出 `🕳️ Wolf_M1 潜伏 10 拍`。物种必须已注册。
+
+**POUNCE（猛扑，非阻塞读取）**
+
+```ebnf
+POUNCE <捕食者> ;
+```
+
+- STDIN 就绪 → 读入数值存入该物种：`🦅 Wolf_M1 猛扑命中，捕获能量 65`
+- 未就绪 → 扑空，能量保持不变：`🐾 Wolf_M1 扑空（无猎物气味），能量保持`
+- EOF/非法输入 → 猎物腐坏，能量保持：`🦠 Wolf_M1 扑到的猎物已腐坏，能量保持`
+- WASM/浏览器构建：无标准输入，永远扑空
+
+**组合范式（v3.0 标准输入姿势，替代旧 SPROUT）**
+
+```foodchain
+SCENT Wolf_M1 TO Tiger_1 ;
+HIBERNATION Wolf_M1 UNTIL Tiger_1 { LURK Wolf_M1 FOR 10 ; SCENT Wolf_M1 TO Tiger_1 ; }
+POUNCE Wolf_M1 ;
+```
+
+先嗅探风中是否有猎物气味（SCENT）；无气味则潜伏数拍后重嗅（LURK + HIBERNATION 循环），直到 Tiger_1 变为 FULL（1）才猛扑捕食（POUNCE）。
 
 ### 6.7 输出：ROT
 
@@ -299,7 +336,7 @@ CODE MODE ;    (* 代码模式：跳过等待，高速执行（默认） *)
 | 胃溃疡溢出惩罚（HERBIVORE >255） | 跳过（即时归零） | 阻塞 2 秒 |
 | 食肉动物奇偶行延迟 | 跳过 | 偶数行 2ms |
 | GC 分解阻塞（微生物速度） | 跳过（即时回收） | 100~1000ms |
-| SPROUT 输入捕捉 | 2 秒超时（输入交互不可跳过） | 同左 |
+| SCENT/LURK/POUNCE 输入组合 | 非阻塞嗅探/潜伏/猛扑 | 同左 |
 
 - 默认**代码模式**：计算结果优先，初学者友好
 - 声明 `REAL MODE ;`（首行或任意位置）：模拟真实生态节奏（进食/分解要花时间）
@@ -350,7 +387,7 @@ OBSERVATION: YYYY-MM-DD, Lat:<纬度>, Lon:<经度>, <内容>
 | FCL-0003 | 非法标识符 | 🌿 外来物种入侵，生态圈不予接纳！ | 物种不在册 |
 | FCL-0004 | 类型错配（命名） | ⚠️ 分类学混乱！ | 物种营养级与声明不符 |
 | FCL-0005 | 命名格式错误 | ⚠️ 族谱登记混乱！ | 族群标识格式不符 |
-| FCL-0006 | 结构错误 | 🌍 生态崩溃，食物链断裂！ | 缺段 / 无 DEVOURS |
+| FCL-0006 | 结构错误 | 🌍 生态崩溃，食物链断裂！ | 缺段 / FOODWEB 内无捕食行为 |
 | FCL-0007 | Division by Zero | 🔥 干旱导致食物链断裂 | 表达式除零 |
 | FCL-0008 | 负值 | 🥀 捕食者饿死，能量为负 | DIFF 时捕食者能量不足 |
 | FCL-0009 | 溢出 | 🤢 胃溃疡溢出，能量归零 | HERBIVORE >255 |
@@ -400,5 +437,5 @@ src/
 └── interpreter.h/.cpp  # 执行引擎（指令/控制流/GC）
 ```
 
-文档版本：v2.4（参考手册）
+文档版本：v3.0（参考手册）
 最后更新：2026-08-27

@@ -25,7 +25,7 @@ jobs:
         with:
           version: 3.1.64
 
-      - name: 编译 FCL 为 WASM（v2.4 — 支持异常返回）
+      - name: 编译 FCL 为 WASM（v3.0.0 — SCENT/LURK/POUNCE 组合输入）
         run: |
           emcc -O2 \
             -sMODULARIZE=1 \

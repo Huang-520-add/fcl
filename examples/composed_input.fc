@@ -1,0 +1,21 @@
+composed input: SCENT + LURK + POUNCE (v3.0, SPROUT decomposed)
+run: echo 65 | ./fcl examples/composed_input.fc
+
+NUMERIC OUTPUT ;
+BIOME {
+INTRODUCE Wolf_M1 AS CARNIVORE WITH 0 ;
+INTRODUCE Tiger_1 AS APEX WITH 0 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+}
+FOODWEB {
+SCENT Wolf_M1 TO Tiger_1 ;
+HIBERNATION Wolf_M1 UNTIL Tiger_1 {
+LURK Wolf_M1 FOR 10 ;
+SCENT Wolf_M1 TO Tiger_1 ;
+}
+POUNCE Wolf_M1 ;
+}
+DECAY {
+Fungus_1 DEVOURS Wolf_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+}

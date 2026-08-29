@@ -1,8 +1,8 @@
 #pragma once
 // ============================================================
 //  FCL 解释器：生态执行引擎
-//  修复：STORM 显式开关 / MUTATION 全物种 / Windows 超时 /
-//        REAL/CODE 双运行模式 / 错误行号
+//  v3.0：SCENT/LURK/POUNCE 原语（SPROUT 分解）、CODE 模式隐藏 🧬、
+//        QUOT 除零报错、重复引种检测、地址表 O(1)、--seed 确定性
 // ============================================================
 #include <string>
 #include <vector>
@@ -31,10 +31,12 @@ class Interp {
 public:
     void run(const std::string& raw);
     void setRealMode(bool v) { realMode_ = v; }  // 真实模式：生态等待生效（进食/分解/溢出惩罚）
+    void setSeed(unsigned s) { rng_.seed(s); }   // 固定随机种子（确定性测试用）
 
 private:
     std::map<std::string, Variable> vars_;
     std::vector<std::string> varOrder_;
+    std::map<std::string, size_t> addrMap_;  // 名字 -> varOrder_ 下标（扑咬距离 O(1) 查询）
     std::set<std::string> mutatedRoots_;   // 发生过 MUTATION 变异的物种根名（MATCH 检测用）
     std::map<std::string, bool> rotFired_;
     std::deque<bool> humidity_;   // 最近 3 条指令湿度记录
@@ -56,6 +58,7 @@ private:
     Variable& getVar(const std::string& name);
     void touch(const std::string& name);
     size_t addrOf(const std::string& name);
+    void rebuildAddrMap();
     Trophic parseTrophic(const std::string& s);
 
     // 执行
@@ -74,9 +77,13 @@ private:
     void execCompetition(Stmt& s);
     void execMimicry(Stmt& s);
     void execRot(Stmt& s);
-    void execSprout(Stmt& s);
-    double readNumWithTimeout(int ms);
     void execExtinction(Stmt& s);
+
+    // v3.0 输入原语（SPROUT 分解：嗅探/潜伏/猛扑，组合实现输入）
+    bool stdinReady();
+    void execScent(Stmt& s);
+    void execLurk(Stmt& s);
+    void execPounce(Stmt& s);
 
     // 控制流
     static int countStmts(const std::vector<Stmt>& v);

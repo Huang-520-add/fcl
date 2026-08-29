@@ -1,4 +1,4 @@
-# FCL Syntax Specification (FCL Syntax Specification) v2.4
+# FCL Syntax Specification (FCL Syntax Specification) v3.0
 
 > This document uses both **formal grammar (EBNF)** and **keyword breakdowns** to precisely define FCL's lexical rules and syntactic structure. Intended for: compiler implementers, language researchers, and developers strictly aligning with the specification.
 > For learning → [FCL_TUTORIAL.md](FCL_TUTORIAL.md); for a syntax quick-reference → [FCL_REFERENCE.md](FCL_REFERENCE.md).
@@ -144,9 +144,15 @@ mimicry       ::= "MIMICRY" apexA "TO" apexB
 ### 2.7 Input
 
 ```
-sprout        ::= "SPROUT" producerIdentifier "FROM" "STDIN"
-                 // predicate: only PRODUCER may be injected
-                 // timeout: 2 seconds
+scent         ::= "SCENT" speciesIdentifier "TO" apexIdentifier
+                 // predicate: the result variable must be an APEX species (Tiger/Lion)
+                 // semantics: non-blocking STDIN readiness probe, stores 1.0 if ready, else 0.0
+lurk          ::= "LURK" speciesIdentifier "FOR" integerLiteral
+                 // predicate: the species must be registered
+                 // semantics: dormant wait of N beats (REAL 100ms/beat, CODE 1ms/beat, clamped 0–600)
+pounce        ::= "POUNCE" speciesIdentifier
+                 // semantics: non-blocking pounce, reads a number if STDIN is ready, otherwise pounces empty
+                 // constraint: all three allowed only inside FOODWEB blocks (v3.0 composed input, replacing SPROUT)
 ```
 
 ### 2.8 Output
@@ -253,18 +259,18 @@ Decomposer DECOMPOSER (5):
 | `DEVOURS` + trophic-level difference ≠ 1 | 🦴 Diet conflict | FCL-0002 |
 | `DEVOURS` + non-APEX using PROD/QUOT | 🦴 Diet conflict | FCL-0002 |
 | `ROT` + non-DECOMPOSER | 🦴 Diet conflict | FCL-0002 |
-| `SPROUT` + non-PRODUCER | 🦴 Diet conflict | FCL-0002 |
+| `SCENT` result variable non-APEX | ⚠️ Classification error | FCL-0004 |
 | `ASSESS` + third parameter non-APEX | 🦴 Diet conflict | FCL-0002 |
 | `DEVOURS` + DIFF with insufficient predator energy | 🥀 Predator starves | FCL-0008 |
 | HERBIVORE energy > 255 | 🤢 Gastric-ulcer overflow | FCL-0009 |
 | Division by zero | 🔥 Drought breaks the food chain | FCL-0007 |
 | HIBERNATION over 10000 rounds | ⏰ Hibernation too long | FCL-0010 |
 | Missing BIOME / FOODWEB / DECAY | 🌍 Ecosystem collapse | FCL-0006 |
-| No DEVOURS inside FOODWEB | 🌍 Ecosystem collapse | FCL-0006 |
+| No predation act (DEVOURS/SCENT/POUNCE) inside FOODWEB | 🌍 Ecosystem collapse | FCL-0006 |
 | Expression parse failure | 🌿 Mutant-species invasion | FCL-0001 |
 | Unknown statement | 🌿 Mutant-species invasion | FCL-0001 |
 
 ---
 
-> Syntax specification version: v2.4
+> Syntax specification version: v3.0
 > Reference implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)

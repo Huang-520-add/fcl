@@ -18,50 +18,64 @@ double ExprEval::eval(const std::string& src, const std::set<std::string>& mutat
 
 double ExprEval::expr() {
     double v = term();
-    while (pos_ < s_.size() && (s_[pos_] == '+' || s_[pos_] == '-')) {
-        char op = s_[pos_++];
-        double r = term();
-        v = (op == '+') ? v + r : v - r;
+    while (true) {
+        while (pos_ < s_.size() && isspace((unsigned char)s_[pos_])) pos_++;
+        if (pos_ < s_.size() && (s_[pos_] == '+' || s_[pos_] == '-')) {
+            char op = s_[pos_++];
+            double r = term();
+            v = (op == '+') ? v + r : v - r;
+        } else break;
     }
     return v;
 }
 
 double ExprEval::term() {
     double v = factor();
-    while (pos_ < s_.size() && (s_[pos_] == '*' || s_[pos_] == '/')) {
-        char op = s_[pos_++];
-        double r = factor();
-        if (op == '*') {
-            v = v * r;
-        } else {
-            if (r == 0) throw FclError(ErrCode::DIVZERO, "🔥 干旱导致食物链断裂");
-            v = v / r;
-        }
+    while (true) {
+        while (pos_ < s_.size() && isspace((unsigned char)s_[pos_])) pos_++;
+        if (pos_ < s_.size() && (s_[pos_] == '*' || s_[pos_] == '/')) {
+            char op = s_[pos_++];
+            double r = factor();
+            if (op == '*') {
+                v = v * r;
+            } else {
+                if (r == 0) throw FclError(ErrCode::DIVZERO, "🔥 干旱导致食物链断裂");
+                v = v / r;
+            }
+        } else break;
     }
     return v;
 }
 
 double ExprEval::factor() {
     while (pos_ < s_.size() && isspace((unsigned char)s_[pos_])) pos_++;
-    if (pos_ >= s_.size()) return 0;
+    // 空因子 = 表达式意外结束（此前静默返回 0，现报错）
+    if (pos_ >= s_.size())
+        throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，表达式意外结束");
     if (s_[pos_] == '(') {
         pos_++;
         double v = expr();
-        while (pos_ < s_.size() && s_[pos_] != ')') pos_++;
+        while (pos_ < s_.size() && isspace((unsigned char)s_[pos_])) pos_++;
+        if (pos_ >= s_.size() || s_[pos_] != ')')
+            throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，表达式括号未闭合");
         pos_++;
         return v;
     }
     if (s_.compare(pos_, 5, "MATCH") == 0) {
         pos_ += 5;
-        while (pos_ < s_.size() && s_[pos_] != '(') pos_++;
+        while (pos_ < s_.size() && isspace((unsigned char)s_[pos_])) pos_++;
+        if (pos_ >= s_.size() || s_[pos_] != '(')
+            throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，MATCH 后缺少左括号");
         pos_++;
         size_t st = pos_;
         while (pos_ < s_.size() && s_[pos_] != ')') pos_++;
+        if (pos_ >= s_.size())
+            throw FclError(ErrCode::EXPR, "🌿 变异物种入侵，MATCH 括号未闭合");
         std::string name = s_.substr(st, pos_ - st);
+        pos_++;
         // 去掉首尾空白
         size_t a = name.find_first_not_of(" \t"), b = name.find_last_not_of(" \t");
         name = (a == std::string::npos) ? "" : name.substr(a, b - a + 1);
-        pos_++;
         // MATCH(name)：该物种是否发生过 MUTATION 变异（按物种根名判定，
         // 根名 / 成员名 / 变异后名称均可，如 Wolf / Wolf_M1 / Wolv_M1）
         std::string root = canonicalSpecies(speciesRoot(name));

@@ -1,4 +1,4 @@
-# FoodChain Language (FCL) Official Technical Specification v2.4
+# FoodChain Language (FCL) Official Technical Specification v3.0
 
 Issued by: International Obfuscated Esolang Foundation (IOEF)
 Protocol name: Trophic Pyramid Protocol
@@ -52,7 +52,7 @@ BIOME {
 /* Introduction phase: only variable declarations and initial energy injection allowed */
 }
 FOODWEB {
-/* Predation phase: core computation logic, must contain at least one DEVOURS operation */
+/* Predation phase: core computation logic, must contain at least one predation act (DEVOURS / SCENT / POUNCE) */
 }
 DECAY {
 /* Decomposition phase: responsible for output and memory reclamation */
@@ -107,10 +107,21 @@ Every DEVOURS operation (except decomposers inside the DECAY block) has a forced
 
 Exemption clause: add `GMO ENABLED ;` on the first program line to restore 100% efficiency, but before each ROT output the 🧬 GMO-product marker is printed.
 
-### 5.4 Input (SPROUT)
+### 5.4 Input (SCENT/LURK/POUNCE Combination)
 
-Only PRODUCER may be injected. Syntax: `SPROUT <producer name> FROM STDIN ;`
-The console plays a 2-second random tone; the programmer must press the spacebar to "catch" the value before the sound stops, otherwise the input is 0 on timeout.
+v3.0 removes the single input primitive SPROUT (a blocking read into a PRODUCER): in an esolang, input is not one statement but a **combination of three atomic behaviors** — sniff (SCENT) → lurk (LURK) → pounce (POUNCE). Each primitive alone is nearly useless; only together can they catch prey. All three primitives may appear **only inside FOODWEB blocks** (where predation/operations live; the FOODWEB validity check accepts DEVOURS / SCENT / POUNCE).
+
+- **SCENT (sniff, non-blocking)**: `SCENT <sniffer> TO <APEX variable> ;` — probes whether STDIN has data ready: ready → stores 1.0 into the APEX species variable, otherwise 0.0. Prints `👃 X sniffs the scent on the wind → Y FULL (prey detected)` or `HUNGRY (no scent)`. The result variable must be an APEX-trophic species (Tiger/Lion).
+- **LURK (lurk, dormant waiting)**: `LURK <species> FOR <beats> ;` — waits N beats (REAL mode 100ms/beat, CODE mode 1ms/beat, clamped 0–600). Prints `🕳️ X lurks for N beats`. The species must be registered.
+- **POUNCE (pounce, non-blocking)**: `POUNCE <predator> ;` — if STDIN is ready, reads a number into the species (prints `🦅 X pounces and hits, capturing energy N`); if not ready, pounces empty and energy is unchanged (`🐾 X pounces at empty air (no prey scent), energy unchanged`); EOF/invalid input counts as spoiled prey (`🦠 X's caught prey has spoiled, energy unchanged`). In WASM/browser builds it always pounces empty.
+
+Combination pattern (replaces the old SPROUT):
+
+```foodchain
+SCENT Wolf_M1 TO Tiger_1 ;
+HIBERNATION Wolf_M1 UNTIL Tiger_1 { LURK Wolf_M1 FOR 10 ; SCENT Wolf_M1 TO Tiger_1 ; }
+POUNCE Wolf_M1 ;
+```
 
 ### 5.5 Output (ROT)
 
@@ -312,10 +323,10 @@ DECAY output: ASCII 13 (carriage return) + `U+000D`. Actual output: `🧬\r🧬U
 - 🐾 Bite misses, energy halved — APEX bite-distance judgment
 - 🌩️ RAIN block statements randomly shuffled — only occurs after `STORM ENABLED` on the first program line AND when the block has >3 statements
 
-Document version: v2.4
+Document version: v3.0
 Last updated: 2026-08-27
 
 �️ RAIN downgraded to STORM — condition block statement count exceeded
 
-Document version: v2.4
+Document version: v3.0
 Last updated: 2026-08-27

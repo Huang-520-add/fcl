@@ -6,7 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Huang-520-add/fcl/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Huang-520-add/fcl/actions)
 ![类别](https://img.shields.io/badge/category-esolang-brightgreen)
 ![实现](https://img.shields.io/badge/implementation-C%2B%2B17-blue)
-![版本](https://img.shields.io/badge/version-v2.4-orange)
+![版本](https://img.shields.io/badge/version-v3.0-orange)
 ![许可](https://img.shields.io/badge/license-MIT-green)
 [![在线试玩](https://img.shields.io/badge/🧪-在线试玩-2d6a4f?style=flat-square)](https://huang-520-add.github.io/fcl/)
 [![文档目录](https://img.shields.io/badge/📚-文档总览-40916c?style=flat-square)](#-文档与教程)
@@ -73,7 +73,7 @@ ROT Fungus_1 TO STDOUT ;
 | 逻辑与 | `SYMBIOSIS A WITH B TO C ;` | 互利共生 |
 | 逻辑或 | `COMPETITION A OR B TO C ;` | 替代觅食路径 |
 | 逻辑非 | `MIMICRY A TO B ;` | 拟态伪装 |
-| 输入 | `SPROUT 生产者 FROM STDIN ;` | 光合作用捕获 |
+| 输入 | `SCENT/LURK/POUNCE 组合` | 嗅探→潜伏→猛扑捕获 |
 | 输出 | `ROT 分解者 TO STDOUT ;` | 分解矿化 |
 | 分支 | `SEASON RAIN { } DRY { }` | 雨季/旱季（湿度驱动） |
 | 定次循环 | `MIGRATION 物种 OVER n { }` | 迁徙（能量开方衰减） |
@@ -100,14 +100,14 @@ fcl/
 │   ├── fcl_error.h         # 错误码体系（FCL-0001~0011）
 │   └── web_main.cpp        # WebAssembly 入口（在线 Playground 用）
 ├── docs/
-│   ├── FCL_TUTORIAL.md      # ★ 官方中文教学书 v2.4（零基础预备课+12课+输出对照+练习）
-│   ├── FCL_TUTORIAL_EN.md   # ★ Official FCL Textbook v2.4 (English)
-│   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.4（语法/指令/类型/GC）
-│   ├── FCL_REFERENCE_EN.md  # ★ Official FCL Reference v2.4 (English)
+│   ├── FCL_TUTORIAL.md      # ★ 官方中文教学书 v3.0（零基础预备课+12课+输出对照+练习）
+│   ├── FCL_TUTORIAL_EN.md   # ★ Official FCL Textbook v3.0 (English)
+│   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v3.0（语法/指令/类型/GC）
+│   ├── FCL_REFERENCE_EN.md  # ★ Official FCL Reference v3.0 (English)
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
 │   ├── FCL_ECOLOGY_EN.md    # Ecology Field Guide (English)
-│   ├── FCL_SPEC.md          # 官方技术规范 v2.4
-│   ├── FCL_SPEC_EN.md       # Official Technical Spec v2.4 (English)
+│   ├── FCL_SPEC.md          # 官方技术规范 v3.0
+│   ├── FCL_SPEC_EN.md       # Official Technical Spec v3.0 (English)
 │   ├── FCL_SYNTAX.md        # 语法规范 EBNF（含完整词法/语法/错误码矩阵）
 │   ├── FCL_SYNTAX_EN.md     # Syntax Specification EBNF (English)
 │   └── ESOLANGS_SUBMISSION.md # esolangs.org 词条投稿素材（英文）
@@ -140,7 +140,7 @@ fcl/
 - **语法规范** [FCL_SYNTAX.md](docs/FCL_SYNTAX.md)（[English](docs/FCL_SYNTAX_EN.md)）：完整 EBNF 语法规范、词法 token、营养级约束矩阵、关键字→错误码映射
 - **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)（[English](docs/FCL_ECOLOGY_EN.md)）：食物链金字塔、10 个在册物种、族群结构、命名规范
 - **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)（[English](docs/FCL_SPEC_EN.md)）：完整语法、指令集、GC 规则、错误对照表
-- **更新日志** [CHANGELOG.md](CHANGELOG.md)：各版本变更记录（v2.1.0 至今）
+- **更新日志** [CHANGELOG.md](CHANGELOG.md)：各版本变更记录（v2.1.0 至今（当前 v3.0.0））
 - **词条投稿** [ESOLANGS_SUBMISSION.md](docs/ESOLANGS_SUBMISSION.md)：esolangs.org 英文词条素材
 
 ## 许可

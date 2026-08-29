@@ -1,4 +1,4 @@
-# FCL Ecology Field Guide (FCL Ecology) v2.4
+# FCL Ecology Field Guide (FCL Ecology) v3.0
 
 > **The essence of FCL: tracing the changes of the ecological tiers.**
 > Every variable is a registered member of the ecosystem; every line of code is an ecological event.
@@ -91,7 +91,9 @@ Colonies and clusters also use numbered individuals:
 | `INTRODUCE <species> AS <trophicLevel> WITH <energy> ;` | Introduction | Variable declaration |
 | `<predator> DEVOURS <prey> USING <algorithm> ;` | Predation (SUM/DIFF/PROD/QUOT) | Arithmetic (result ×0.2, 20% energy-transfer efficiency) |
 | `CLONE <target> FROM <source> ;` | Asexual reproduction | Copy |
-| `SPROUT <producer> FROM STDIN ;` | Photosynthetic capture | Input |
+| `SCENT <sniffer> TO <APEX> ;` | Scent sniffing | Input probing |
+| `LURK <species> FOR <beats> ;` | Lurking wait | Input waiting |
+| `POUNCE <predator> ;` | Pouncing capture | Input reading |
 | `ROT <decomposer> TO STDOUT ;` | Decomposition / mineralization | Output |
 
 ### Niche assessment and logic (new in v2.0)
@@ -169,5 +171,5 @@ Every line of FCL code is an ecological event; every run is an ecological succes
 
 Code passes through devouring; truth manifests through decomposition.
 
-Document version: v2.4 (Ecology Field Guide)
+Document version: v3.0 (Ecology Field Guide)
 Last updated: 2026-08-27

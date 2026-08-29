@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iostream>
 #include <regex>
+#include <sstream>
 #include <thread>
 
 #ifndef _WIN32
@@ -26,11 +27,21 @@ namespace fcl {
 void Interp::run(const std::string& raw) {
     std::string src = stripComments(raw);
     // 全局开关（三段式之外，程序首行）：GMO / STORM / NUMERIC OUTPUT / REAL MODE
+    // P2-4 修复：精确按语句匹配（此前为任意子串搜索，注释/字符串含 "GMO" 会误触发）
     size_t biomePos = src.find("BIOME");
-    if (src.find("GMO") < biomePos) gmo_ = true;
-    if (src.find("STORM") < biomePos) storm_ = true;
-    if (src.find("NUMERIC") < biomePos) numericOut_ = true;
-    if (src.find("REAL MODE") < biomePos) realMode_ = true;
+    if (biomePos != std::string::npos) {
+        std::stringstream prefixStream(src.substr(0, biomePos));
+        std::string seg;
+        while (std::getline(prefixStream, seg, ';')) {
+            std::vector<std::string> toks = splitWS(trim(seg));
+            if (toks.empty()) continue;
+            if (toks.size() == 2 && toks[0] == "GMO" && toks[1] == "ENABLED") gmo_ = true;
+            else if (toks.size() == 2 && toks[0] == "STORM" && toks[1] == "ENABLED") storm_ = true;
+            else if (toks.size() == 2 && toks[0] == "NUMERIC" && toks[1] == "OUTPUT") numericOut_ = true;
+            else if (toks.size() == 2 && toks[0] == "REAL" && toks[1] == "MODE") realMode_ = true;
+            else if (toks.size() == 2 && toks[0] == "CODE" && toks[1] == "MODE") realMode_ = false;
+        }
+    }
 
     // 三段式提取（按顺序，禁止颠倒）
     std::string biome = extractBlock(src, "BIOME", 0);
@@ -40,8 +51,11 @@ void Interp::run(const std::string& raw) {
     size_t fEnd = src.find('}', src.find("FOODWEB"));
     if (fEnd == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
     std::string decay = extractBlock(src, "DECAY", fEnd);
-    // FOODWEB 必须含 DEVOURS
-    if (foodweb.find("DEVOURS") == std::string::npos)
+    // FOODWEB 必须含捕食行为（v3.0：DEVOURS / SCENT / POUNCE 均可，
+    // 嗅探与猛扑也是捕食链的一环，纯输入组合程序不再被误判为食物链断裂）
+    if (foodweb.find("DEVOURS") == std::string::npos &&
+        foodweb.find("SCENT") == std::string::npos &&
+        foodweb.find("POUNCE") == std::string::npos)
         throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
 
     int line = 1;
@@ -117,8 +131,14 @@ void Interp::touch(const std::string& name) {
 }
 
 size_t Interp::addrOf(const std::string& name) {
-    for (size_t i = 0; i < varOrder_.size(); i++) if (varOrder_[i] == name) return i;
-    return 0;
+    // P2-6 修复：地址表 O(1) 查询（此前线性扫描 O(n)）
+    auto it = addrMap_.find(name);
+    return (it != addrMap_.end()) ? it->second : 0;
+}
+
+void Interp::rebuildAddrMap() {
+    addrMap_.clear();
+    for (size_t i = 0; i < varOrder_.size(); i++) addrMap_[varOrder_[i]] = i;
 }
 
 Trophic Interp::parseTrophic(const std::string& s) {
@@ -173,7 +193,9 @@ void Interp::execOne(Stmt& s) {
             else if (s.kind == "COMPETITION") execCompetition(s);
             else if (s.kind == "MIMICRY") execMimicry(s);
             else if (s.kind == "ROT") execRot(s);
-            else if (s.kind == "SPROUT") execSprout(s);
+            else if (s.kind == "SCENT") execScent(s);
+            else if (s.kind == "LURK") execLurk(s);
+            else if (s.kind == "POUNCE") execPounce(s);
             else if (s.kind == "EXTINCTION") execExtinction(s);
             else throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
         }
@@ -198,6 +220,18 @@ void Interp::execIntroduce(Stmt& s) {
                   : (err.rfind("分类学", std::string::npos) != std::string::npos ? ErrCode::TAXONOMY : ErrCode::GENEALOGY);
         throw FclError(code, err);
     }
+    // P2-2 修复：重复引种检测（此前静默覆盖，BIOME 段笔误无法发现）
+    auto dup = vars_.find(name);
+    if (dup != vars_.end()) {
+        if (dup->second.type != t)
+            throw FclError(ErrCode::TAXONOMY,
+                "⚠️ 分类学混乱！" + name + " 已按" + trophicName(dup->second.type) +
+                "在册，不可改判为" + trophicName(t));
+        if (biomePhase_)
+            throw FclError(ErrCode::GENEALOGY,
+                "⚠️ 族谱登记混乱！" + name + " 在 BIOME 引种段重复登记");
+        // BIOME 之外（循环体内）允许重新引种 = 种群重置（历史惯例，教程依赖）
+    }
     size_t wi = 0;
     for (size_t i = 0; i < s.args.size(); i++) if (s.args[i] == "WITH") { wi = i; break; }
     std::string e;
@@ -205,8 +239,17 @@ void Interp::execIntroduce(Stmt& s) {
     double v = ExprEval::eval(e, mutatedRoots_);
     if (t == PRODUCER && (v < 0 || v > 9999.9)) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     if (t == APEX && v != 0 && v != 1) v = (v > 0) ? 1 : 0;  // 布尔归一
-    vars_[name] = Variable{ name, t, v, 0, stmtCount_, true };
-    varOrder_.push_back(name);
+    if (dup != vars_.end()) {
+        // 重置：保留引种顺序与地址，只刷新能量与适应期
+        dup->second.value = v;
+        dup->second.age = 0;
+        dup->second.born = stmtCount_;
+        touch(name);
+    } else {
+        vars_[name] = Variable{ name, t, v, 0, stmtCount_, true };
+        varOrder_.push_back(name);
+        addrMap_[name] = varOrder_.size() - 1;
+    }
 }
 
 void Interp::execDevour(Stmt& s) {
@@ -226,7 +269,10 @@ void Interp::execDevour(Stmt& s) {
         th = p.value - q.value;
     } else if (algo == "PROD" || algo == "QUOT") {
         if (p.type != APEX) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有顶级掠食者可 PROD/QUOT");
-        double raw = (algo == "PROD") ? p.value * q.value : (q.value == 0 ? 0 : (int)(p.value / q.value));
+        // P2-1 修复：QUOT 除零与表达式除零行为统一（此前静默返回 0）
+        if (algo == "QUOT" && q.value == 0)
+            throw FclError(ErrCode::DIVZERO, "🔥 干旱导致食物链断裂");
+        double raw = (algo == "PROD") ? p.value * q.value : (int)(p.value / q.value);
         // 扑咬距离：存储地址差为偶数则落空
         size_t di = addrOf(pred), dj = addrOf(prey);
         if ((di + dj) % 2 == 0) {
@@ -325,7 +371,8 @@ void Interp::execRot(Stmt& s) {
     std::string name = s.args[1];
     Variable& v = getVar(name);
     if (v.type != DECOMPOSER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，只有分解者可 ROT");
-    if (gmo_) std::cout << "🧬";  // 转基因产品标识
+    // v3.0：🧬 转基因标识仅在 REAL MODE 显示（CODE 模式输出保持纯净）
+    if (gmo_ && realMode_) std::cout << "🧬";
     if (numericOut_) {
         // 数值输出模式：直接打印数值（如 55 → "55"）
         std::cout << static_cast<long long>(v.value) << std::flush;
@@ -342,71 +389,6 @@ void Interp::execRot(Stmt& s) {
     }
     std::cout << std::flush;
     touch(name);
-}
-
-void Interp::execSprout(Stmt& s) {
-    std::string name = s.args[1];
-    Variable& v = getVar(name);
-    if (v.type != PRODUCER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，SPROUT 只能注入生产者");
-#ifndef FCL_WASM
-    // 摩斯电码铃声（终端 10 声蜂鸣，约 2 秒）；浏览器版（WASM）跳过等待，避免阻塞 UI
-    std::cout << "📡 摩斯电码播放中（2 秒），按空格捕捉数值..." << std::endl;
-    for (int i = 0; i < 10; i++) {
-        std::cout << '\a' << std::flush;
-        std::this_thread::sleep_for(std::chrono::milliseconds(180));
-    }
-#endif
-    double num = readNumWithTimeout(2000);
-    v.value = num;
-    touch(name);
-}
-
-double Interp::readNumWithTimeout(int ms) {
-#ifdef FCL_WASM
-    // WASM/浏览器环境无标准输入：SPROUT 直接返回 0（P1-5 修复）
-    std::cout << "⏰ 浏览器版不支持标准输入，SPROUT 返回 0" << std::endl;
-    return 0;
-#elif defined(_WIN32)
-    // Windows：真超时（P0-3 修复）
-    // 管道输入（重定向/CI）：PeekNamedPipe 检测数据，无数据立即返回 0
-    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD avail = 0;
-    if (h != INVALID_HANDLE_VALUE && PeekNamedPipe(h, NULL, 0, NULL, &avail, NULL)) {
-        if (avail > 0) {
-            double x;
-            std::cin >> x;
-            return x;
-        }
-        std::cout << "⏰ 捕捉超时，输入为 0" << std::endl;
-        return 0;
-    }
-    // 控制台交互：_kbhit 轮询实现超时
-    for (int i = 0; i < ms / 50; i++) {
-        if (_kbhit()) {
-            double x;
-            std::cin >> x;
-            return x;
-        }
-        Sleep(50);
-    }
-    std::cout << "⏰ 捕捉超时，输入为 0" << std::endl;
-    return 0;
-#else
-    // POSIX：select 2000ms 超时
-    fd_set set;
-    FD_ZERO(&set);
-    FD_SET(STDIN_FILENO, &set);
-    timeval tv;
-    tv.tv_sec = ms / 1000;
-    tv.tv_usec = (ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &set, nullptr, nullptr, &tv) > 0) {
-        double x;
-        std::cin >> x;
-        return x;
-    }
-    std::cout << "⏰ 捕捉超时，输入为 0" << std::endl;
-    return 0;
-#endif
 }
 
 void Interp::execExtinction(Stmt& s) {
@@ -435,6 +417,99 @@ void Interp::execExtinction(Stmt& s) {
         std::cout << std::endl;
     }
     vars_.erase(it);
+    varOrder_.erase(std::remove(varOrder_.begin(), varOrder_.end(), name), varOrder_.end());
+    rebuildAddrMap();
+}
+
+// ============================================================
+//  v3.0 输入原语（SPROUT 分解）
+//  设计哲学：深奥语言不做"高级封装"——输入不再是一条语句，
+//  而是嗅探（SCENT）+ 潜伏（LURK）+ 猛扑（POUNCE）三个原子
+//  行为的组合。单独一个原语几乎无用，组合起来才能捕获猎物：
+//
+//    SCENT Wolf_M1 TO Tiger_1 ;         // 嗅探：STDIN 有数据吗？
+//    HIBERNATION Wolf_M1 UNTIL Tiger_1 {
+//        LURK Wolf_M1 FOR 10 ;          // 潜伏 10 拍再嗅
+//        SCENT Wolf_M1 TO Tiger_1 ;
+//    }
+//    POUNCE Wolf_M1 ;                   // 猛扑：读入数值
+// ============================================================
+bool Interp::stdinReady() {
+#ifdef FCL_WASM
+    // 浏览器环境无标准输入：永远嗅不到猎物气味
+    return false;
+#elif defined(_WIN32)
+    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD avail = 0;
+    if (h != INVALID_HANDLE_VALUE && PeekNamedPipe(h, NULL, 0, NULL, &avail, NULL))
+        return avail > 0;  // 管道/重定向输入
+    return _kbhit() != 0;  // 交互控制台
+#else
+    // POSIX：select 0 超时 = 非阻塞探测
+    fd_set set;
+    FD_ZERO(&set);
+    FD_SET(STDIN_FILENO, &set);
+    timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    return select(STDIN_FILENO + 1, &set, nullptr, nullptr, &tv) > 0;
+#endif
+}
+
+void Interp::execScent(Stmt& s) {
+    // [SCENT, 嗅探者, TO, APEX]：非阻塞嗅探风中猎物气味（STDIN 就绪性）
+    std::string sniffer = s.args[1], apex = s.args[3];
+    requireAPEX(apex);
+    Variable& cv = getVar(apex);
+    cv.value = stdinReady() ? 1.0 : 0.0;
+    std::cout << "👃 " << sniffer << " 嗅探风中气味 → " << apex
+              << (cv.value ? " FULL（嗅到猎物）" : " HUNGRY（无气味）") << std::endl;
+    touch(apex);
+}
+
+void Interp::execLurk(Stmt& s) {
+    // [LURK, 物种, FOR, 节拍数]：潜伏等待（不动，保存体力）
+    std::string name = s.args[1];
+    getVar(name);  // 物种必须在册
+    int n = std::atoi(s.args[3].c_str());
+    if (n < 0) n = 0;
+    if (n > 600) n = 600;  // 上限 600 拍，防止失控等待
+    // 节拍时长：REAL 100ms/拍（真实生态节奏）；CODE 1ms/拍（快进视角）
+    int ms = realMode_ ? n * 100 : n;
+    std::cout << "🕳️ " << name << " 潜伏 " << n << " 拍" << std::endl;
+#ifndef FCL_WASM
+    if (ms > 0) std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#else
+    (void)ms;  // WASM：不等待
+#endif
+    touch(name);
+}
+
+void Interp::execPounce(Stmt& s) {
+    // [POUNCE, 捕食者]：非阻塞猛扑。STDIN 有数据 → 读入数值存入该物种；
+    // 无数据 → 扑空，能量保持不变（先 SCENT 再 POUNCE 才是正确姿势）
+    std::string name = s.args[1];
+    Variable& v = getVar(name);
+#ifdef FCL_WASM
+    std::cout << "⏳ 浏览器版无标准输入，" << name << " 扑空" << std::endl;
+    touch(name);
+    return;
+#endif
+    if (!stdinReady()) {
+        std::cout << "🐾 " << name << " 扑空（无猎物气味），能量保持" << std::endl;
+        touch(name);
+        return;
+    }
+    double x = 0;
+    if (std::cin >> x) {
+        v.value = x;
+        std::cout << "🦅 " << name << " 猛扑命中，捕获能量 " << x << std::endl;
+    } else {
+        // 流坏损（EOF/非法数值）：视为扑空
+        std::cin.clear();
+        std::cout << "🦠 " << name << " 扑到的猎物已腐坏，能量保持" << std::endl;
+    }
+    touch(name);
 }
 
 // ============================================================
@@ -554,7 +629,7 @@ void Interp::renameVar(std::vector<Stmt>& v, const std::string& from, const std:
 }
 
 void Interp::renameVariableInPlace(const std::string& from, const std::string& to) {
-    // 在册变量改名：vars_ 键 / varOrder_ / rotFired_ 同步迁移
+    // 在册变量改名：vars_ 键 / varOrder_ / addrMap_ / rotFired_ 同步迁移
     auto it = vars_.find(from);
     if (it == vars_.end()) return;
     Variable v = it->second;
@@ -562,6 +637,12 @@ void Interp::renameVariableInPlace(const std::string& from, const std::string& t
     v.name = to;
     vars_[to] = v;
     for (auto& n : varOrder_) if (n == from) n = to;
+    auto am = addrMap_.find(from);
+    if (am != addrMap_.end()) {
+        size_t idx = am->second;
+        addrMap_.erase(am);
+        addrMap_[to] = idx;
+    }
     auto rf = rotFired_.find(from);
     if (rf != rotFired_.end()) {
         bool b = rf->second;
@@ -584,6 +665,7 @@ void Interp::gcTick() {
         // 只有能量耗尽的"尸体"才被分解；活体（能量>0）不受分解威胁
         if (v.age >= 3 && v.value == 0) toKill.push_back(k);
     }
+    bool removed = false;
     for (auto& k : toKill) {
         auto it = vars_.find(k);
         if (it == vars_.end()) continue;
@@ -597,7 +679,9 @@ void Interp::gcTick() {
 #endif
         vars_.erase(it);
         varOrder_.erase(std::remove(varOrder_.begin(), varOrder_.end(), k), varOrder_.end());
+        removed = true;
     }
+    if (removed) rebuildAddrMap();
 }
 
 } // namespace fcl

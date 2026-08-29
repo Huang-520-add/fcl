@@ -92,7 +92,7 @@ std::string canonicalSpecies(const std::string& root) {
 
 std::string renameSpeciesToken(const std::string& tok, const std::string& from, const std::string& to) {
     if (tok == from) return to;
-    if (tok.rfind("Alpha_" + from, 0) == 0) return "Alpha_" + to + tok.substr(5 + from.size());
+    if (tok.rfind("Alpha_" + from, 0) == 0) return "Alpha_" + to + tok.substr(6 + from.size());
     if (tok.rfind(from + "_", 0) == 0) return to + tok.substr(from.size());
     return tok;
 }

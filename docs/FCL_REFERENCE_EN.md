@@ -1,4 +1,4 @@
-# FCL Language Reference — English Edition v2.4
+# FCL Language Reference — English Edition v3.0
 
 > **The authoritative technical reference for FCL.**
 > Use this as a lookup guide: syntax, types, instructions, control flow, and garbage collection.
@@ -49,13 +49,13 @@ The core re-mapping:
 
 ```
 BIOME   { ... }   // Introduction: variable declarations only (INTRODUCE)
-FOODWEB { ... }   // Computation: core logic, must contain at least one DEVOURS
+FOODWEB { ... }   // Computation: core logic, must contain at least one predation act (DEVOURS / SCENT / POUNCE)
 DECAY   { ... }   // Decomposition: output (ROT) and cleanup (EXTINCTION)
 ```
 
 Rules:
 - All three sections are **mandatory and ordered** — missing any → 🌍 Ecosystem collapse
-- FOODWEB must contain at least one DEVOURS — otherwise → 🌍 Ecosystem collapse
+- FOODWEB must contain at least one predation act — DEVOURS / SCENT / POUNCE — otherwise → 🌍 Ecosystem collapse
 - `GMO ENABLED` goes on the first line, outside the three sections
 - Statements end with `;`; blocks use `{ }`
 
@@ -193,13 +193,50 @@ MIMICRY    <A> TO <B> ;             // B = NOT A
 
 All operands must be APEX.
 
-### 6.6 Input (SPROUT)
+### 6.6 Input: SCENT/LURK/POUNCE (Combinable Primitives)
+
+v3.0 decomposes the old SPROUT (a blocking read into a PRODUCER) into three combinable atomic primitives — input is no longer one statement but a **sniff → lurk → pounce** combination. All three primitives may appear only inside FOODWEB blocks (the FOODWEB validity check accepts DEVOURS / SCENT / POUNCE).
+
+**SCENT (sniff — non-blocking STDIN readiness probe)**
 
 ```foodchain
-SPROUT <producer_name> FROM STDIN ;
+SCENT <sniffer> TO <apex_variable> ;
 ```
 
-Injects value into a PRODUCER. Plays a 2-second tone; user must type a number within the timeout → 0 on timeout. Non-PRODUCER → 🦴.
+If STDIN has data ready, stores 1.0 into the APEX species variable; otherwise stores 0.0. Prints:
+- `👃 Wolf_M1 sniffs the scent on the wind → Tiger_1 FULL (prey detected)` (ready)
+- `👃 Wolf_M1 sniffs the scent on the wind → Tiger_1 HUNGRY (no scent)` (not ready)
+
+The result variable must be an APEX-trophic species (Tiger/Lion), otherwise ⚠️ classification error.
+
+**LURK (lurk — dormant waiting)**
+
+```foodchain
+LURK <species> FOR <beats> ;
+```
+
+Waits N beats before continuing: REAL mode 100ms/beat, CODE mode 1ms/beat, beats clamped to 0–600. Prints `🕳️ Wolf_M1 lurks for 10 beats`. The species must be registered.
+
+**POUNCE (pounce — non-blocking read)**
+
+```foodchain
+POUNCE <predator> ;
+```
+
+- STDIN ready → reads a number into the species: `🦅 Wolf_M1 pounces and hits, capturing energy 65`
+- Not ready → pounces empty, energy unchanged: `🐾 Wolf_M1 pounces at empty air (no prey scent), energy unchanged`
+- EOF/invalid input → spoiled prey, energy unchanged: `🦠 Wolf_M1's caught prey has spoiled, energy unchanged`
+- WASM/browser builds: no standard input, always pounces empty
+
+**Combination pattern (the canonical v3.0 input idiom, replacing SPROUT)**
+
+```foodchain
+SCENT Wolf_M1 TO Tiger_1 ;
+HIBERNATION Wolf_M1 UNTIL Tiger_1 { LURK Wolf_M1 FOR 10 ; SCENT Wolf_M1 TO Tiger_1 ; }
+POUNCE Wolf_M1 ;
+```
+
+First sniff the wind for prey scent (SCENT); if there is none, lurk a few beats and re-sniff (LURK inside the HIBERNATION loop) until Tiger_1 becomes FULL (1), then pounce to capture the value (POUNCE).
 
 ### 6.7 Output (ROT)
 
@@ -299,7 +336,7 @@ CODE MODE ;    // Skip all wait times, fast execution (default)
 | HERBIVORE ulcer penalty (>255) | Skipped (instant reset) | Blocks 2 seconds |
 | Carnivore even-line delay | Skipped | 2ms |
 | GC decomposition blocking | Skipped (instant) | 100–1000ms random |
-| SPROUT timeout | 2s interactive (can't skip) | Same |
+| SCENT/LURK/POUNCE input combination | Non-blocking sniff/lurk/pounce | Same |
 
 ---
 
@@ -347,7 +384,7 @@ All errors are structured: `[error_code @line] ecological message` (since v2.2).
 | FCL-0003 | 🌿 Invasive species! | Species not in registry |
 | FCL-0004 | ⚠️ Classification error! | Species trophic level mismatches declared type |
 | FCL-0005 | ⚠️ Family registry error! | Social species missing M/F label |
-| FCL-0006 | 🌍 Ecosystem collapse! | Missing section / no DEVOURS in FOODWEB |
+| FCL-0006 | 🌍 Ecosystem collapse! | Missing section / no predation act in FOODWEB |
 | FCL-0007 | 🔥 Drought! | Division by zero |
 | FCL-0008 | 🥀 Predator starved! | DIFF: predator energy < prey energy |
 | FCL-0009 | 🤢 Ulcer overflow! | HERBIVORE energy > 255 |
@@ -399,6 +436,6 @@ src/
 
 ---
 
-> Reference Manual v2.4 (English Edition)
+> Reference Manual v3.0 (English Edition)
 > Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Chinese Edition: [FCL_REFERENCE.md](FCL_REFERENCE.md)

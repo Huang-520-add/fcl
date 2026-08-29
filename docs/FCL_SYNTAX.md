@@ -1,4 +1,4 @@
-# FCL 语法规范（FCL Syntax Specification）v2.4
+# FCL 语法规范（FCL Syntax Specification）v3.0
 
 > 本文档以**形式化语法**（EBNF）和**关键词拆解**两种方式，精确定义 FCL 的词法规则与语法结构。适合：编译器实现者、语言研究者、严格对标规范的开发者。
 > 学习入门 → [FCL_TUTORIAL.md](FCL_TUTORIAL.md)；语法速查 → [FCL_REFERENCE.md](FCL_REFERENCE.md)。
@@ -144,9 +144,15 @@ mimicry       ::= "MIMICRY" apexA "TO" apexB
 ### 2.7 输入（Input）
 
 ```
-sprout        ::= "SPROUT" producerIdentifier "FROM" "STDIN"
-                 // predicate: 只能注入 PRODUCER
-                 // timeout: 2 秒
+scent         ::= "SCENT" speciesIdentifier "TO" apexIdentifier
+                 // predicate: 结果变量必须是 APEX 物种（Tiger/Lion）
+                 // semantics: 非阻塞嗅探 STDIN 就绪性，就绪存 1.0，否则 0.0
+lurk          ::= "LURK" speciesIdentifier "FOR" integerLiteral
+                 // predicate: 物种必须已注册
+                 // semantics: 潜伏等待 N 拍（REAL 100ms/拍，CODE 1ms/拍，钳制 0–600）
+pounce        ::= "POUNCE" speciesIdentifier
+                 // semantics: 非阻塞猛扑，STDIN 就绪则读入数值，否则扑空能量不变
+                 // constraint: 三者只能出现在 FOODWEB 块内（v3.0 组合输入，替代 SPROUT）
 ```
 
 ### 2.8 输出（Output）
@@ -251,18 +257,18 @@ MATCH()      ::= "MATCH(" identifier ")"      // 变异检测：变异→1，未
 | `DEVOURS` + 营养级差不为 1 | 🦴 食性冲突 | FCL-0002 |
 | `DEVOURS` + 非 APEX 使用 PROD/QUOT | 🦴 食性冲突 | FCL-0002 |
 | `ROT` + 非 DECOMPOSER | 🦴 食性冲突 | FCL-0002 |
-| `SPROUT` + 非 PRODUCER | 🦴 食性冲突 | FCL-0002 |
+| `SCENT` 结果变量非 APEX | ⚠️ 分类学混乱 | FCL-0004 |
 | `ASSESS` + 第三个参数非 APEX | 🦴 食性冲突 | FCL-0002 |
 | `DEVOURS` + DIFF 时捕食者能量不足 | 🥀 捕食者饿死 | FCL-0008 |
 | HERBIVORE 能量 > 255 | 🤢 胃溃疡溢出 | FCL-0009 |
 | 除零 | 🔥 干旱导致食物链断裂 | FCL-0007 |
 | HIBERNATION 超过 10000 轮 | ⏰ 冬眠过久 | FCL-0010 |
 | 缺少 BIOME / FOODWEB / DECAY | 🌍 生态崩溃 | FCL-0006 |
-| FOODWEB 内无 DEVOURS | 🌍 生态崩溃 | FCL-0006 |
+| FOODWEB 内无捕食行为（DEVOURS/SCENT/POUNCE） | 🌍 生态崩溃 | FCL-0006 |
 | 表达式解析失败 | 🌿 变异物种入侵 | FCL-0001 |
 | 未知语句 | 🌿 变异物种入侵 | FCL-0001 |
 
 ---
 
-> 语法规范版本：v2.4
+> 语法规范版本：v3.0
 > 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)

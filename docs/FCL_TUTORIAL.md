@@ -1,4 +1,4 @@
-# FCL 超详细中文教学书（FCL Textbook — Chinese Edition）v2.4
+# FCL 超详细中文教学书（FCL Textbook — Chinese Edition）v3.0
 
 > **给"零基础"学习者的大型保姆式教程。**
 >
@@ -349,7 +349,7 @@ BIOME { ... }
    BIOME { ... }     ← ❌ 不能把 BIOME 放中间！
    DECAY { ... }
 
-⚠️ 规则 3：FOODWEB 段里必须至少有 1 次 DEVOURS（捕食）
+⚠️ 规则 3：FOODWEB 段里必须至少有 1 次捕食行为（DEVOURS / SCENT / POUNCE 均可）
    没有捕食 → 🌍 生态崩溃（食物链断了！）
 ```
 
@@ -1625,5 +1625,5 @@ DECAY {
 
 ---
 
-> 教学书 v2.4 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> 教学书 v3.0 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > 语法速查：[FCL_REFERENCE.md](FCL_REFERENCE.md) ｜ 生态圈图鉴：[FCL_ECOLOGY.md](FCL_ECOLOGY.md) ｜ 语法规范：[FCL_SYNTAX.md](FCL_SYNTAX.md)
