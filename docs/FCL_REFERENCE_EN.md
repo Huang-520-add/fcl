@@ -345,8 +345,6 @@ All errors are structured: `[error_code @line] ecological message` (since v2.2).
 
 ### 11.1 Standard Library
 
-- `Bacillus_Stdio`: Decomposer with stdin/stdout MOS code handling
-- `Rhizobium_Math`: High-precision symbiotic bacteria for APEX multiplication
 - `Virus_Crash`: Process exit (triggered via `EXTINCTION Virus_Crash ;`)
 
 ### 11.2 Example Index

@@ -1,7 +1,7 @@
 # FCL 语法规范（FCL Syntax Specification）v2.4
 
 > 本文档以**形式化语法**（EBNF）和**关键词拆解**两种方式，精确定义 FCL 的词法规则与语法结构。适合：编译器实现者、语言研究者、严格对标规范的开发者。
-> 学习入门 → [FCL_TUTORIAL_CN.md](FCL_TUTORIAL_CN.md)；语法速查 → [FCL_REFERENCE.md](FCL_REFERENCE.md)。
+> 学习入门 → [FCL_TUTORIAL.md](FCL_TUTORIAL.md)；语法速查 → [FCL_REFERENCE.md](FCL_REFERENCE.md)。
 
 ---
 
@@ -35,19 +35,19 @@ FCL 源码允许的字符：
 ### 1.3 关键字表（按字母序）
 
 ```
-Alpha_*, ASSESS, Bacillus_*, Bacillus_Stdio, BEGIN,
+Alpha_*, ASSESS, Bacillus_*,
 COMPETITION, DECAY, DEVOURS, DRY,
 EXTINCTION,
 FOODWEB,
 GMO,
 HIBERNATION,
 INTRODUCE,
-Lion_*, Lupus_*, MATCH,
+Lion_*, MATCH,
 MIMICRY, MIGRATION, MUTATION,
 NUMERIC OUTPUT,
 OBSERVATION:,
 PRODUCER,
-RAIN, REAL MODE, ROT, Rhizobium_Math,
+RAIN, REAL MODE, ROT, STORM,
 SEASON, STDIN, STDOUT, SUM, SYMBIOSIS,
 TO,
 USING,
@@ -63,13 +63,14 @@ WITH,
 ### 2.1 程序结构（Program）
 
 ```
-program       ::= shebang? gmoline? numline? modeDecl?
+program       ::= shebang? gmoline? stormline? numline? modeDecl?
                   BIOME block
                   FOODWEB block
                   DECAY block
 
 shebang       ::= "#!" ... NEWLINE          // 可选，支持 shebang 行
 gmoline       ::= "GMO ENABLED" ";" NEWLINE
+stormline     ::= "STORM ENABLED" ";" NEWLINE   // 可选：开启后 RAIN 块 >3 条语句随机乱序
 numline       ::= "NUMERIC OUTPUT" ";" NEWLINE
 modeDecl      ::= ("REAL MODE" | "CODE MODE") ";" NEWLINE
 

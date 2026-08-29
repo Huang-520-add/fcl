@@ -4,7 +4,7 @@
 协议名称：金字塔协议（Trophic Pyramid Protocol）
 设计哲学："代码在吞噬中传递，真理在分解中显现。"
 生态圈图鉴：见 [FCL_ECOLOGY.md](FCL_ECOLOGY.md)（在册物种、族群结构、命名规范）
-参考实现：C++17 解释器（fcl），g++ -std=c++17 -O2 -o fcl main.cpp 编译
+参考实现：C++17 解释器（fcl），`make build` 或 `g++ -std=c++17 -O2 -o fcl src/main.cpp src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp` 编译（多文件模块，非单文件）。
 
 > **v2.0 修订说明**（在 v1.3 基础上）：
 > 1. **生态圈世界观**：变量名不再任意，必须使用生态圈在册物种（10 个代表物种，5 个营养级），遵循族群结构（独居/群居、Alpha 首领、M/F 性别标签、编号）。详见 FCL_ECOLOGY.md。
@@ -81,7 +81,7 @@ DECAY {
 INTRODUCE <标识符> AS <营养级> WITH <能量表达式> ;
 ```
 
-示例：`INTRODUCE Trifolium_Repens AS PRODUCER WITH 1/3 ;`
+示例：`INTRODUCE Grass_1 AS PRODUCER WITH 1/3 ;`
 能量表达式支持：纯数字、分数（a/b）、四则运算（+ - * /）与括号。`WITH 0 ;` 合法。
 
 ### 5.2 数据传递（啃食/捕食）
@@ -126,7 +126,7 @@ CLONE <目标> FROM <源> ;
 
 目标获得源的值的副本（克隆不消耗源，源的能量不受影响）。目标必须已通过 INTRODUCE 引种（否则类型未知）。生态依据：营养繁殖/克隆技术（扦插、多利羊）。
 
-示例：`CLONE A FROM T ;` —— A 变成 T 的副本。
+示例：`CLONE Grass_2 FROM Grass_1 ;` —— A 变成 T 的副本。
 
 > **设计动机**：FCL 的能量流严格单向（猎物被吃即归零，值只能流向更高营养级），导致"回写"（如斐波那契递推中的 `Y_new = X_old`）无法实现。CLONE 是生态学上最自然的复制机制，补上了这一环。
 
@@ -160,11 +160,11 @@ FCL 没有传统 if/for，一切逻辑由环境关键字驱动：
 
 - **条件分支**：`SEASON RAIN { ... } DRY { ... }`（二选一）
   湿度 = 最近 3 条指令中 DEVOURS 次数；≥2 为湿润 → 执行 RAIN，否则执行 DRY。
-  若 RAIN 块内语句超过 3 条，RAIN 自动降级为 STORM，块内语句随机乱序执行一次。
+  RAIN 默认按书写顺序执行；仅在程序首行声明 `STORM ENABLED ;` 后，RAIN 块内语句数 >3 时块内语句才随机乱序执行一次（🌩️）。**默认（未声明 STORM）RAIN 绝不乱序**，保证确定性。
 - **循环**：`MIGRATION <物种> OVER <次数> { ... }`
   每轮迭代，该物种能量值自动开平方根衰减（模拟长途迁徙消耗）。
 - **多路选择**：`MUTATION <变量> { CASE "特征": ... }`
-  变量名在运行时会被随机替换为同音异形词（如 Canis → Kannis），需用内置正则函数 MATCH() 捕获。
+  变量名在运行时会被随机替换为变异名（如 Wolf → Wolv、Grass → Grasse、Tiger → Tygre，全表见生态圈图鉴），变异概率 1/3，需用 MATCH() 检测。
 
 ## 7. 垃圾回收
 
@@ -202,118 +202,117 @@ OBSERVATION: YYYY-MM-DD, Lat:<纬度>, Lon:<经度>, <内容>
 ```foodchain
 GMO ENABLED ;
 BIOME {
-INTRODUCE Algae_A AS PRODUCER WITH (1+2) ;
-INTRODUCE Algae_B AS PRODUCER WITH (3+2) ;
-INTRODUCE Zooplankton AS HERBIVORE WITH 0 ;
+INTRODUCE Algae_1 AS PRODUCER WITH (1+2) ;
+INTRODUCE Algae_2 AS PRODUCER WITH (3+2) ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
 }
 FOODWEB {
-Zooplankton DEVOURS Algae_A USING SUM ;
-Zooplankton DEVOURS Algae_B USING SUM ;
+Sheep_M1 DEVOURS Algae_1 USING SUM ;
+Sheep_M1 DEVOURS Algae_2 USING SUM ;
 }
 DECAY {
-INTRODUCE Bacteria_Ecoli AS DECOMPOSER WITH 0 ;
-Bacteria_Ecoli DEVOURS Zooplankton USING SUM ;
-ROT Bacteria_Ecoli TO STDOUT ;
-ROT Bacteria_Ecoli TO STDOUT ;
+INTRODUCE Bacillus_1 AS DECOMPOSER WITH 0 ;
+Bacillus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Bacillus_1 TO STDOUT ;
+ROT Bacillus_1 TO STDOUT ;
 }
 ```
 
-推演：Algae_A=3, Algae_B=5，GMO 免税 → Zooplankton=8 → 分解者全额回收 8 → 输出 ASCII 8（退格符）+ `U+0008`。实测输出：`🧬\b🧬U+0008`。
+推演：Algae_1=3, Algae_2=5，GMO 免税 → Sheep_M1=8 → 分解者全额回收 8 → 输出 ASCII 8（退格符）+ `U+0008`。实测输出：`🧬\b🧬U+0008`。
 
 ### 示例 2（有税，展示能量传递效率 20%）
 
 ```foodchain
 BIOME {
-INTRODUCE Grass AS PRODUCER WITH 30+35 ;
-INTRODUCE Sheep AS HERBIVORE WITH 0 ;
+INTRODUCE Grass_1 AS PRODUCER WITH 30+35 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
 }
 FOODWEB {
-Sheep DEVOURS Grass USING SUM ;
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
 }
 DECAY {
-INTRODUCE Fungus AS DECOMPOSER WITH 0 ;
-Fungus DEVOURS Sheep USING SUM ;
-ROT Fungus TO STDOUT ;
-ROT Fungus TO STDOUT ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+ROT Fungus_1 TO STDOUT ;
 }
 ```
 
-推演：Grass=65 → Sheep=65×0.2=13 → Fungus=13 → 输出 ASCII 13（回车符）+ `U+000D`。
+推演：Grass_1=65 → Sheep_M1=65×0.2=13 → Fungus_1=13 → 输出 ASCII 13（回车符）+ `U+000D`。
 
 ### 示例 3（推荐演示：输出可见字符 'A'）
 
 ```foodchain
 GMO ENABLED ;
 BIOME {
-INTRODUCE Grass AS PRODUCER WITH 60+5 ;
-INTRODUCE Sheep AS HERBIVORE WITH 0 ;
+INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
 }
 FOODWEB {
-Sheep DEVOURS Grass USING SUM ;
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
 }
 DECAY {
-INTRODUCE Fungus AS DECOMPOSER WITH 0 ;
-Fungus DEVOURS Sheep USING SUM ;
-ROT Fungus TO STDOUT ;
-ROT Fungus TO STDOUT ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+Fungus_1 DEVOURS Sheep_M1 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+ROT Fungus_1 TO STDOUT ;
 }
 ```
 
-推演：Grass=65，GMO 免税 → Sheep=65 → Fungus=65 → 输出 `'A'` + `U+0041`。实测输出：`🧬A🧬U+0041`。
+推演：Grass_1=65，GMO 免税 → Sheep_M1=65 → Fungus_1=65 → 输出 `'A'` + `U+0041`。实测输出：`🧬A🧬U+0041`。
 
 ### 示例 4（斐波那契：MIGRATION + CLONE 递推，输出 F(7)=13）
 
 ```foodchain
 GMO ENABLED ;
 BIOME {
-INTRODUCE A AS PRODUCER WITH 1 ;
-INTRODUCE B AS PRODUCER WITH 1 ;
-INTRODUCE H AS HERBIVORE WITH 0 ;
-INTRODUCE T AS PRODUCER WITH 0 ;
-INTRODUCE Fungus AS DECOMPOSER WITH 0 ;
+INTRODUCE Grass_1 AS PRODUCER WITH 1 ;
+INTRODUCE Grass_2 AS PRODUCER WITH 1 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Algae_1 AS PRODUCER WITH 0 ;
+INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
 }
 FOODWEB {
-MIGRATION H OVER 5 {
-CLONE T FROM B ;
-H DEVOURS A USING SUM ;
-H DEVOURS B USING SUM ;
-CLONE A FROM T ;
-CLONE B FROM H ;
-INTRODUCE H AS HERBIVORE WITH 0 ;
-INTRODUCE T AS PRODUCER WITH 0 ;
+MIGRATION Sheep_M1 OVER 5 {
+CLONE Algae_1 FROM Grass_2 ;
+Sheep_M1 DEVOURS Grass_1 USING SUM ;
+Sheep_M1 DEVOURS Grass_2 USING SUM ;
+CLONE Grass_1 FROM Algae_1 ;
+CLONE Grass_2 FROM Sheep_M1 ;
+INTRODUCE Sheep_M1 AS HERBIVORE WITH 0 ;
+INTRODUCE Algae_1 AS PRODUCER WITH 0 ;
 }
 }
 DECAY {
-Fungus DEVOURS B USING SUM ;
-ROT Fungus TO STDOUT ;
-ROT Fungus TO STDOUT ;
+Fungus_1 DEVOURS Grass_2 USING SUM ;
+ROT Fungus_1 TO STDOUT ;
+ROT Fungus_1 TO STDOUT ;
 }
 ```
 
-递推逻辑（A=F(n-1), B=F(n)，H 为累加器，T 为备份）：
-1. `CLONE T FROM B`：备份 F(n) 到 T（否则 B 被吃后旧值丢失）
-2. `H DEVOURS A`、`H DEVOURS B`：H = F(n-1) + F(n) = F(n+1)
-3. `CLONE A FROM T`：A = F(n)（旧 B 的值）→ 成为下一轮的 F(n-1)
-4. `CLONE B FROM H`：B = F(n+1) → 成为下一轮的 F(n)
-5. 重置 H/T（INTRODUCE 覆盖为 0）
+递推逻辑（Grass_1=F(n-1), Grass_2=F(n)，Sheep_M1 为累加器，Algae_1 为备份）：
+1. `CLONE Algae_1 FROM Grass_2`：备份 F(n) 到 Algae_1（否则 Grass_2 被吃后旧值丢失）
+2. `Sheep_M1 DEVOURS Grass_1`、`Sheep_M1 DEVOURS Grass_2`：Sheep_M1 = F(n-1) + F(n) = F(n+1)
+3. `CLONE Grass_1 FROM Algae_1`：Grass_1 = F(n)（旧 Grass_2 的值）→ 成为下一轮的 F(n-1)
+4. `CLONE Grass_2 FROM Sheep_M1`：Grass_2 = F(n+1) → 成为下一轮的 F(n)
+5. 重置 Sheep_M1/Algae_1（INTRODUCE 覆盖为 0）
 
-推演：轮 1 → A=1, B=2；轮 2 → A=2, B=3；轮 3 → A=3, B=5；轮 4 → A=5, B=8；轮 5 → A=8, **B=13=F(7)**。
+推演：轮 1 → Grass_1=1, Grass_2=2；轮 2 → Grass_1=2, Grass_2=3；轮 3 → Grass_1=3, Grass_2=5；轮 4 → Grass_1=5, Grass_2=8；轮 5 → Grass_1=8，**Grass_2=13=F(7)**。
 DECAY 输出：ASCII 13（回车符）+ `U+000D`。实测输出：`🧬\r🧬U+000D`。
 
 ## 附录 B：标准库（预置物种）
 
-- `Bacillus_Stdio`：标准输入输出分解者（自动处理摩斯电码）
-- `Rhizobium_Math`：内置高精度乘法共生菌（可被 APEX 调用）
 - `Virus_Crash`：专门用于强制退出程序（`EXTINCTION Virus_Crash ;`）
 
 ## 附录 C：生态观察（趣味输出）
 
 - 🔬 建议使用双名法（属名_种加词）——单名变量提醒
 - 🍄 `<变量> 被分解者回收`——GC 触发
-- 🧬 变异：`Canis → Kannis`——MUTATION 触发
+- 🧬 变异：`Wolf → Wolv`——MUTATION 触发（1/3 概率改名）
 - 🐾 扑咬落空，能量减半——APEX 扑咬距离判定
-- 🌩️ RAIN 降级为 STORM——条件块语句超限
+- 🌩️ RAIN 块语句随机乱序——仅在程序首行 `STORM ENABLED` 后、且块内 >3 条语句时发生
 
 文档版本：v2.4
 最后更新：2026-08-27
+
 

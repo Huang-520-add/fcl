@@ -6,7 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Huang-520-add/fcl/ci.yml?branch=main&label=CI&logo=github)](https://github.com/Huang-520-add/fcl/actions)
 ![类别](https://img.shields.io/badge/category-esolang-brightgreen)
 ![实现](https://img.shields.io/badge/implementation-C%2B%2B17-blue)
-![版本](https://img.shields.io/badge/version-v2.4.0-orange)
+![版本](https://img.shields.io/badge/version-v2.4-orange)
 ![许可](https://img.shields.io/badge/license-MIT-green)
 [![在线试玩](https://img.shields.io/badge/🧪-在线试玩-2d6a4f?style=flat-square)](https://huang-520-add.github.io/fcl/web/index.html)
 [![文档目录](https://img.shields.io/badge/📚-文档总览-40916c?style=flat-square)](#-文档与教程)
@@ -34,7 +34,7 @@ DECAY { ... }    ← 分解段：输出与内存回收
 ```bash
 make build            # 编译（g++ -std=c++17 -O2）
 ./fcl examples/example3.fc   # 输出: 🧬A🧬U+0041
-make test             # 全量 22 用例测试
+make test             # 全量 26 用例测试
 ```
 
 ```foodchain
@@ -85,18 +85,28 @@ foodchain-lang/
 ├── Makefile                 # make build / make test / make clean
 ├── .github/workflows/ci.yml # GitHub Actions：编译 + 全量测试
 ├── src/
-│   └── main.cpp             # C++17 解释器（单文件参考实现，~750 行）
+│   ├── main.cpp            # 入口：参数解析、错误输出
+│   ├── interpreter.cpp/.h  # 生态执行引擎（指令实现/控制流/GC）
+│   ├── parser.cpp/.h       # 三段式块 → 语句列表
+│   ├── expr.cpp/.h         # 表达式求值（递归下降）
+│   ├── ecology.cpp/.h      # 在册物种、命名校验
+│   └── web_main.cpp        # WebAssembly 入口（在线 Playground 用）
 ├── docs/
-│   ├── FCL_TUTORIAL.md      # ★ 官方教学书 v2.4（零基础预备课+12课+输出对照+练习）
-│   ├── FCL_TUTORIAL_CN.md   # ★ 超详细中文教学书 v2.4（保姆级讲解）
+│   ├── FCL_TUTORIAL.md      # ★ 官方中文教学书 v2.4（零基础预备课+12课+输出对照+练习）
 │   ├── FCL_TUTORIAL_EN.md   # ★ Official FCL Textbook v2.4 (English)
 │   ├── FCL_REFERENCE.md     # ★ 官方参考手册 v2.4（语法/指令/类型/GC）
 │   ├── FCL_REFERENCE_EN.md  # ★ Official FCL Reference v2.4 (English)
 │   ├── FCL_ECOLOGY.md       # 生态圈图鉴（在册物种/族群/命名规范）
+│   ├── FCL_ECOLOGY_EN.md    # Ecology Field Guide (English)
 │   ├── FCL_SPEC.md          # 官方技术规范 v2.4
-│   └── FCL_SYNTAX.md        # 语法规范 EBNF（含完整词法/语法/错误码矩阵）
+│   ├── FCL_SPEC_EN.md       # Official Technical Spec v2.4 (English)
+│   ├── FCL_SYNTAX.md        # 语法规范 EBNF（含完整词法/语法/错误码矩阵）
+│   └── FCL_SYNTAX_EN.md     # Syntax Specification EBNF (English)
 ├── tests/
-│   └── run_tests.sh         # 全量测试脚本（22 用例）
+│   └── run_tests.sh         # 全量测试脚本（26 用例）
+├── web/
+│   ├── index.html           # 在线 Playground（根 index.html 跳转至此）
+│   └── web_main.cpp         # WebAssembly 入口（CI 编译为 fcl.js）
 └── examples/
     ├── example1.fc          # 附录示例 1（3+5=8，输出退格符 + U+0008）
     ├── example2.fc          # 附录示例 2（20% 能量税演示）
@@ -115,11 +125,11 @@ foodchain-lang/
 
 ## 文档
 
-- **官方教学书** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)（[中文版](docs/FCL_TUTORIAL_CN.md)，[English](docs/FCL_TUTORIAL_EN.md)）：**零基础也能读**——预备课讲清编程/ASCII/报错，每课含生态小课堂、逐行讲解、**输出对照表**、练习，附词汇表 ★ 学习用
+- **官方中文教学书** [FCL_TUTORIAL.md](docs/FCL_TUTORIAL.md)（[English](docs/FCL_TUTORIAL_EN.md)）：**零基础也能读**——预备课讲清编程/ASCII/报错，每课含生态小课堂、逐行讲解、**输出对照表**、练习，附词汇表 ★ 学习用
 - **官方参考手册** [FCL_REFERENCE.md](docs/FCL_REFERENCE.md)（[English](docs/FCL_REFERENCE_EN.md)）：全部语法/指令/类型/GC/错误表 ★ 查阅用
-- **语法规范** [FCL_SYNTAX.md](docs/FCL_SYNTAX.md)：完整 EBNF 语法规范、词法 token、营养级约束矩阵、关键字→错误码映射
-- **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)：食物链金字塔、10 个在册物种、族群结构、命名规范
-- **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)：完整语法、指令集、GC 规则、错误对照表
+- **语法规范** [FCL_SYNTAX.md](docs/FCL_SYNTAX.md)（[English](docs/FCL_SYNTAX_EN.md)）：完整 EBNF 语法规范、词法 token、营养级约束矩阵、关键字→错误码映射
+- **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)（[English](docs/FCL_ECOLOGY_EN.md)）：食物链金字塔、10 个在册物种、族群结构、命名规范
+- **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)（[English](docs/FCL_SPEC_EN.md)）：完整语法、指令集、GC 规则、错误对照表
 
 ## 许可
 

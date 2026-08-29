@@ -357,8 +357,6 @@ OBSERVATION: YYYY-MM-DD, Lat:<纬度>, Lon:<经度>, <内容>
 
 ### 11.1 标准库（预置物种）
 
-- `Bacillus_Stdio`：标准输入输出分解者（自动处理摩斯电码）
-- `Rhizobium_Math`：高精度乘法共生菌（可被 APEX 调用）
 - `Virus_Crash`：强制退出（EXTINCTION Virus_Crash ;）
 
 ### 11.2 完整示例索引
