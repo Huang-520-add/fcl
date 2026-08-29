@@ -1,5 +1,9 @@
 # FCL — 食物链语言 (FoodChain Language)
 
+<p align="center">
+  <img src="docs/logo.svg" alt="FCL Logo" width="180">
+</p>
+
 > **代码在吞噬中传递，真理在分解中显现。**
 > 一门把生态学写进语法的深奥编程语言（Esolang）。变量是生态圈的在册物种，运算是一次次捕食，控制流是一场场生态演替。参考实现为 C++17 解释器。
 

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" width="360" height="360">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#2a2a26"/>
+    </marker>
+  </defs>
+
+  <!-- 中心字标 -->
+  <circle cx="180" cy="180" r="72" fill="none" stroke="#cdc7b8" stroke-width="1.2"/>
+  <text x="180" y="188" text-anchor="middle" font-family="ui-monospace,monospace" font-size="34" font-weight="700" fill="#2a2a26" letter-spacing="2">FCL</text>
+
+  <!-- 三个扇区（顺时针 120° 一段） -->
+  <!-- BIOME（绿）：顶部 -->
+  <path d="M180 56 A124 124 0 0 1 287.23 242.02 L243.78 219.34 A76 76 0 0 0 180 104 Z" fill="#2d6a4f" opacity="0.92"/>
+  <!-- FOODWEB（赭红）：右下 -->
+  <path d="M287.23 242.02 A124 124 0 0 1 72.77 242.02 L116.22 219.34 A76 76 0 0 0 243.78 219.34 Z" fill="#c1666b" opacity="0.92"/>
+  <!-- DECAY（深褐）：左下 -->
+  <path d="M72.77 242.02 A124 124 0 0 1 180 56 L180 104 A76 76 0 0 0 116.22 219.34 Z" fill="#6f4e37" opacity="0.92"/>
+
+  <!-- 扇区内图标 -->
+  <!-- BIOME：嫩芽 -->
+  <g transform="translate(180,118)">
+    <path d="M0 8 Q-8 -2 -4 -10 Q0 -4 0 -10 Q0 -4 4 -10 Q8 -2 0 8 Z" fill="#e8f5e9"/>
+    <line x1="0" y1="8" x2="0" y2="14" stroke="#e8f5e9" stroke-width="1.4"/>
+  </g>
+  <!-- FOODWEB：箭头闭环（捕食） -->
+  <g transform="translate(240,232)" stroke="#fdecee" fill="none" stroke-width="1.8" stroke-linecap="round">
+    <path d="M-9 0 a9 9 0 1 1 9 -9" marker-end="url(#arrow)"/>
+    <circle cx="9" cy="9" r="1.6" fill="#fdecee" stroke="none"/>
+  </g>
+  <!-- DECAY：蘑菇 -->
+  <g transform="translate(120,232)">
+    <path d="M-9 0 Q-9 -10 0 -10 Q9 -10 9 0 Z" fill="#e8dccd"/>
+    <rect x="-2.5" y="0" width="5" height="6" rx="1" fill="#e8dccd"/>
+  </g>
+
+  <!-- 三段流向箭头（顺时针） -->
+  <path d="M250 86 A124 124 0 0 1 286 156" fill="none" stroke="#2a2a26" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M274 272 A124 124 0 0 1 206 296" fill="none" stroke="#2a2a26" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M110 284 A124 124 0 0 1 76 214" fill="none" stroke="#2a2a26" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <!-- 回环：DECAY → BIOME（能量回收） -->
+  <path d="M84 150 A124 124 0 0 1 130 78" fill="none" stroke="#2a2a26" stroke-width="2" stroke-dasharray="3 4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- 外环三段标签 -->
+  <text x="180" y="40" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9.5" fill="#6b6557" letter-spacing="2.5">BIOME</text>
+  <text x="318" y="288" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9.5" fill="#6b6557" letter-spacing="2.5">FOODWEB</text>
+  <text x="42" y="288" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9.5" fill="#6b6557" letter-spacing="2.5">DECAY</text>
+</svg>
