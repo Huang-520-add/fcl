@@ -31,10 +31,16 @@ DECAY { ... }    ← 分解段：输出与内存回收
 
 ## 快速开始
 
+**方式一：在线试玩**（无需安装）→ [FCL Playground](https://huang-520-add.github.io/fcl/)
+
+**方式二：下载预编译二进制** → [Releases](https://github.com/Huang-520-add/fcl/releases)（Linux / Windows / macOS，Windows 版静态链接免运行时）
+
+**方式三：源码编译**
+
 ```bash
 make build            # 编译（g++ -std=c++17 -O2）
 ./fcl examples/example3.fc   # 输出: 🧬A🧬U+0041
-make test             # 全量 26 用例测试
+make test             # 全量 42 用例 + 24 条输出断言测试
 ```
 
 ```foodchain
@@ -82,14 +88,16 @@ ROT Fungus_1 TO STDOUT ;
 fcl/
 ├── LICENSE                  # MIT
 ├── README.md                # 本文件
+├── CHANGELOG.md             # 更新日志（各版本变更记录）
 ├── Makefile                 # make build / make test / make clean
-├── .github/workflows/ci.yml # GitHub Actions：编译 + 全量测试
+├── .github/workflows/       # CI（三平台编译+测试）/ Release（自动发布）/ Web（WASM+Pages 部署）
 ├── src/
 │   ├── main.cpp            # 入口：参数解析、错误输出
 │   ├── interpreter.cpp/.h  # 生态执行引擎（指令实现/控制流/GC）
 │   ├── parser.cpp/.h       # 三段式块 → 语句列表
 │   ├── expr.cpp/.h         # 表达式求值（递归下降）
 │   ├── ecology.cpp/.h      # 在册物种、命名校验
+│   ├── fcl_error.h         # 错误码体系（FCL-0001~0011）
 │   └── web_main.cpp        # WebAssembly 入口（在线 Playground 用）
 ├── docs/
 │   ├── FCL_TUTORIAL.md      # ★ 官方中文教学书 v2.4（零基础预备课+12课+输出对照+练习）
@@ -101,13 +109,14 @@ fcl/
 │   ├── FCL_SPEC.md          # 官方技术规范 v2.4
 │   ├── FCL_SPEC_EN.md       # Official Technical Spec v2.4 (English)
 │   ├── FCL_SYNTAX.md        # 语法规范 EBNF（含完整词法/语法/错误码矩阵）
-│   └── FCL_SYNTAX_EN.md     # Syntax Specification EBNF (English)
+│   ├── FCL_SYNTAX_EN.md     # Syntax Specification EBNF (English)
+│   └── ESOLANGS_SUBMISSION.md # esolangs.org 词条投稿素材（英文）
 ├── tests/
-│   └── run_tests.sh         # 全量测试脚本（26 用例）
+│   ├── run_tests.sh         # 黑盒退出码测试（38 用例，随 examples/ 自动增减）
+│   └── output_tests.sh      # 白盒输出断言测试（24 条断言）
 ├── web/
-│   ├── index.html           # 在线 Playground（根 index.html 跳转至此）
-│   └── web_main.cpp         # WebAssembly 入口（CI 编译为 fcl.js）
-└── examples/
+│   └── index.html           # 在线 Playground（根 index.html 跳转至此；fcl.js/fcl.wasm 由 CI 编译）
+└── examples/                # 42 个用例
     ├── example1.fc          # 附录示例 1（3+5=8，输出退格符 + U+0008）
     ├── example2.fc          # 附录示例 2（20% 能量税演示）
     ├── example3.fc          # 附录示例 3（输出 'A' + U+0041，推荐）
@@ -120,6 +129,7 @@ fcl/
     ├── eco_logic.fc         # 生态位评估与逻辑（ASSESS/SYMBIOSIS/...）
     ├── eco_hibernate.fc     # 冬眠条件循环（输出 'Q'）
     ├── control_*.fc         # 控制流与输入输出系列
+    ├── edge_*.fc            # 边界用例（数值边界/命名族谱/嵌套控制流）
     └── err_*.fc             # 错误用例系列（应报错退出码 1）
 ```
 
@@ -130,6 +140,8 @@ fcl/
 - **语法规范** [FCL_SYNTAX.md](docs/FCL_SYNTAX.md)（[English](docs/FCL_SYNTAX_EN.md)）：完整 EBNF 语法规范、词法 token、营养级约束矩阵、关键字→错误码映射
 - **生态圈图鉴** [FCL_ECOLOGY.md](docs/FCL_ECOLOGY.md)（[English](docs/FCL_ECOLOGY_EN.md)）：食物链金字塔、10 个在册物种、族群结构、命名规范
 - **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)（[English](docs/FCL_SPEC_EN.md)）：完整语法、指令集、GC 规则、错误对照表
+- **更新日志** [CHANGELOG.md](CHANGELOG.md)：各版本变更记录（v2.1.0 至今）
+- **词条投稿** [ESOLANGS_SUBMISSION.md](docs/ESOLANGS_SUBMISSION.md)：esolangs.org 英文词条素材
 
 ## 许可
 
