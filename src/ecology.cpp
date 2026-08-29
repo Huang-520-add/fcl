@@ -62,4 +62,39 @@ std::string ecoNameError(const std::string& name, Trophic type) {
     return "⚠️ 族谱登记混乱！该物种须为 <物种>_<编号>";
 }
 
+// ============================================================
+//  物种变异（MUTATION 共享设施）
+// ============================================================
+const std::map<std::string, std::string>& mutationTable() {
+    // P0-2 修复：变异表覆盖全部 10 个在册物种（单一事实来源，文档/解释器共用）
+    static const std::map<std::string, std::string> mut = {
+        {"Grass", "Grasse"},   {"Algae", "Algee"},
+        {"Sheep", "Sheepe"},   {"Rabbit", "Rabbite"},
+        {"Wolf", "Wolv"},      {"Fox", "Foxy"},
+        {"Tiger", "Tygre"},    {"Lion", "Lyone"},
+        {"Fungus", "Funge"},   {"Bacillus", "Bacilluz"}
+    };
+    return mut;
+}
+
+std::string speciesRoot(const std::string& name) {
+    if (name.rfind("Alpha_", 0) == 0) return name.substr(6);
+    size_t us = name.find('_');
+    return (us == std::string::npos) ? name : name.substr(0, us);
+}
+
+std::string canonicalSpecies(const std::string& root) {
+    for (const auto& e : ECOLOGY) if (e.name == root) return root;
+    // 变异名还原为原名（Wolv → Wolf）
+    for (const auto& [from, to] : mutationTable()) if (to == root) return from;
+    return "";
+}
+
+std::string renameSpeciesToken(const std::string& tok, const std::string& from, const std::string& to) {
+    if (tok == from) return to;
+    if (tok.rfind("Alpha_" + from, 0) == 0) return "Alpha_" + to + tok.substr(5 + from.size());
+    if (tok.rfind(from + "_", 0) == 0) return to + tok.substr(from.size());
+    return tok;
+}
+
 } // namespace fcl

@@ -5,19 +5,20 @@
 //  无法解析的 token 抛 ErrCode::EXPR（不再静默返回 0）
 // ============================================================
 #include <string>
-#include <map>
+#include <set>
 #include "fcl_error.h"
 
 namespace fcl {
 
 class ExprEval {
 public:
-    static double eval(const std::string& src, const std::map<std::string, bool>& mutated);
+    // mutatedRoots：发生过 MUTATION 变异的物种根名集合（Wolf / Wolv 均指 Wolf）
+    static double eval(const std::string& src, const std::set<std::string>& mutatedRoots);
 private:
     explicit ExprEval(const std::string& s) : s_(s) {}
     const std::string& s_;
     size_t pos_ = 0;
-    const std::map<std::string, bool>* mut_ = nullptr;
+    const std::set<std::string>* mut_ = nullptr;
 
     double expr();
     double term();

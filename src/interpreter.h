@@ -35,7 +35,7 @@ public:
 private:
     std::map<std::string, Variable> vars_;
     std::vector<std::string> varOrder_;
-    std::map<std::string, bool> mutated_;
+    std::set<std::string> mutatedRoots_;   // 发生过 MUTATION 变异的物种根名（MATCH 检测用）
     std::map<std::string, bool> rotFired_;
     std::deque<bool> humidity_;   // 最近 3 条指令湿度记录
     std::set<std::string> touchedThis_;
@@ -85,6 +85,7 @@ private:
     void execHibernation(Stmt& s);
     void execMutation(Stmt& s);
     static void renameVar(std::vector<Stmt>& v, const std::string& from, const std::string& to);
+    void renameVariableInPlace(const std::string& from, const std::string& to);
 
     // 垃圾回收
     void gcTick();

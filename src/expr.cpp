@@ -1,12 +1,13 @@
 #include "expr.h"
+#include "ecology.h"
 #include <cstdlib>
 #include <cctype>
 
 namespace fcl {
 
-double ExprEval::eval(const std::string& src, const std::map<std::string, bool>& mutated) {
+double ExprEval::eval(const std::string& src, const std::set<std::string>& mutatedRoots) {
     ExprEval e(src);
-    e.mut_ = &mutated;
+    e.mut_ = &mutatedRoots;
     double v = e.expr();
     // 表达式解析后必须到达末尾，残留 token = 语法错误（P1-4 修复）
     while (e.pos_ < e.s_.size() && isspace((unsigned char)e.s_[e.pos_])) e.pos_++;
@@ -61,7 +62,10 @@ double ExprEval::factor() {
         size_t a = name.find_first_not_of(" \t"), b = name.find_last_not_of(" \t");
         name = (a == std::string::npos) ? "" : name.substr(a, b - a + 1);
         pos_++;
-        return (mut_ && mut_->count(name)) ? 1.0 : 0.0;
+        // MATCH(name)：该物种是否发生过 MUTATION 变异（按物种根名判定，
+        // 根名 / 成员名 / 变异后名称均可，如 Wolf / Wolf_M1 / Wolv_M1）
+        std::string root = canonicalSpecies(speciesRoot(name));
+        return (mut_ && !root.empty() && mut_->count(root)) ? 1.0 : 0.0;
     }
     // 数字解析：失败即抛错（P1-4 修复，不再静默返回 0）
     char* endp = nullptr;

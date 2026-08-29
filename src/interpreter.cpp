@@ -202,7 +202,7 @@ void Interp::execIntroduce(Stmt& s) {
     for (size_t i = 0; i < s.args.size(); i++) if (s.args[i] == "WITH") { wi = i; break; }
     std::string e;
     for (size_t i = wi + 1; i < s.args.size(); i++) e += s.args[i];
-    double v = ExprEval::eval(e, mutated_);
+    double v = ExprEval::eval(e, mutatedRoots_);
     if (t == PRODUCER && (v < 0 || v > 9999.9)) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     if (t == APEX && v != 0 && v != 1) v = (v > 0) ? 1 : 0;  // 布尔归一
     vars_[name] = Variable{ name, t, v, 0, stmtCount_, true };
@@ -348,11 +348,14 @@ void Interp::execSprout(Stmt& s) {
     std::string name = s.args[1];
     Variable& v = getVar(name);
     if (v.type != PRODUCER) throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，SPROUT 只能注入生产者");
+#ifndef FCL_WASM
+    // 摩斯电码铃声（终端 10 声蜂鸣，约 2 秒）；浏览器版（WASM）跳过等待，避免阻塞 UI
     std::cout << "📡 摩斯电码播放中（2 秒），按空格捕捉数值..." << std::endl;
     for (int i = 0; i < 10; i++) {
         std::cout << '\a' << std::flush;
         std::this_thread::sleep_for(std::chrono::milliseconds(180));
     }
+#endif
     double num = readNumWithTimeout(2000);
     v.value = num;
     touch(name);
@@ -474,6 +477,8 @@ void Interp::execMigration(Stmt& s) {
 
 void Interp::execHibernation(Stmt& s) {
     // [HIBERNATION, 物种, UNTIL, 条件变量]：冬眠直到条件 FULL 才醒
+    if (s.args.size() < 4)
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", s.line);
     std::string name = s.args[1];
     std::string cond = s.args[3];
     requireAPEX(cond);
@@ -492,33 +497,76 @@ void Interp::execHibernation(Stmt& s) {
 }
 
 void Interp::execMutation(Stmt& s) {
-    // P0-2 修复：变异表覆盖全部 10 个在册物种
-    static std::map<std::string, std::string> mut = {
-        {"Grass", "Grasse"}, {"Algae", "Algee"},
-        {"Sheep", "Sheepe"}, {"Rabbit", "Rabbite"},
-        {"Wolf", "Wolv"},   {"Fox", "Foxy"},
-        {"Tiger", "Tygre"}, {"Lion", "Lyone"},
-        {"Fungus", "Funge"}, {"Bacillus", "Bacilluz"}
-    };
-    std::string name = s.args[1];
-    std::string newName = name;
-    auto it = mut.find(name);
-    if (it != mut.end() && (rng_() % 3 == 0)) {
-        newName = it->second;
-        std::cout << "🧬 变异：" << name << " → " << newName << std::endl;
-        mutated_[name] = true;
+    // MUTATION <物种成员名|根名> { CASE "特征": <语句> ... }
+    // 语义（与 FCL_SYNTAX 2.9 / FCL_TUTORIAL 第 12 课对齐）：
+    //   1/3 概率该物种发生变异（根名 Wolf→Wolv，P0-2：全部 10 物种在册）：
+    //   - 物种级改名：块执行期间，该物种全部在册成员临时改名
+    //     （Wolf_M1→Wolv_M1、Alpha_Wolf→Alpha_Wolv），块内引用同步改写，
+    //     块结束后恢复原名，块外引用不受影响；
+    //   - 分支选择：变异触发时随机表达一个 CASE 分支；未触发则整个块空转；
+    //   - MATCH() 按物种根名记录变异（Wolf/Wolf_M1/Wolv_M1 均可检测），跨块持续存在。
+    if (s.args.size() < 2)
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", s.line);
+    const auto& mut = mutationTable();
+    std::string root = canonicalSpecies(speciesRoot(s.args[1]));
+    if (root.empty())
+        throw FclError(ErrCode::INVASIVE, "🌿 外来物种入侵，生态圈不予接纳！", s.line);
+    auto mit = mut.find(root);
+    bool fired = (mit != mut.end()) && (rng_() % 3 == 0);
+
+    // 物种级临时改名（块作用域）：先收集成员再改键，避免迭代器失效
+    std::vector<std::pair<std::string, std::string>> applied;  // 旧名→新名，块结束后逆序还原
+    if (fired) {
+        std::cout << "🧬 变异：" << root << " → " << mit->second << std::endl;
+        mutatedRoots_.insert(root);
+        std::vector<std::string> members;
+        for (auto& kv : vars_)
+            if (canonicalSpecies(speciesRoot(kv.first)) == root) members.push_back(kv.first);
+        for (auto& m : members) {
+            std::string nn = renameSpeciesToken(m, root, mit->second);
+            if (nn != m) {
+                renameVariableInPlace(m, nn);
+                applied.emplace_back(m, nn);
+                touch(nn);
+            }
+        }
     }
-    for (auto& cs : s.body) {
-        std::vector<Stmt> body = cs.body;
-        renameVar(body, name, newName);
+
+    // 分支选择：变异触发 → 随机表达一支（无 CASE 标签的块整体作为单一分支）；未触发 → 空转
+    if (fired && !s.body.empty()) {
+        size_t pick = rng_() % s.body.size();
+        std::vector<Stmt> body = s.body[pick].body;  // 拷贝执行：改名不打穿语句树
+        renameVar(body, root, mit->second);
         execStmts(body);
     }
+
+    // 恢复临时改名（块外旧名继续有效）
+    for (auto it = applied.rbegin(); it != applied.rend(); ++it)
+        renameVariableInPlace(it->second, it->first);
 }
 
 void Interp::renameVar(std::vector<Stmt>& v, const std::string& from, const std::string& to) {
+    // 物种级 token 改写：Wolf_M1 / Alpha_Wolf / Wolf → Wolv_M1 / Alpha_Wolv / Wolv
     for (auto& s : v) {
-        for (auto& a : s.args) if (a == from) a = to;
+        for (auto& a : s.args) a = renameSpeciesToken(a, from, to);
         if (s.hasBody) renameVar(s.body, from, to);
+    }
+}
+
+void Interp::renameVariableInPlace(const std::string& from, const std::string& to) {
+    // 在册变量改名：vars_ 键 / varOrder_ / rotFired_ 同步迁移
+    auto it = vars_.find(from);
+    if (it == vars_.end()) return;
+    Variable v = it->second;
+    vars_.erase(it);
+    v.name = to;
+    vars_[to] = v;
+    for (auto& n : varOrder_) if (n == from) n = to;
+    auto rf = rotFired_.find(from);
+    if (rf != rotFired_.end()) {
+        bool b = rf->second;
+        rotFired_.erase(rf);
+        rotFired_[to] = b;
     }
 }
 
