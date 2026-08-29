@@ -153,7 +153,7 @@ fcl/
 
 **语言名**：FoodChain Language (FCL)
 
-**作者**：by.荒（设计）/ ima.copilot（参考实现）
+**作者**：by.荒
 
 **设计年代**：2026
 
