@@ -440,12 +440,22 @@ bool Interp::stdinReady() {
     return false;
 #elif defined(_WIN32)
     HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD avail = 0;
-    if (h != INVALID_HANDLE_VALUE && PeekNamedPipe(h, NULL, 0, NULL, &avail, NULL))
-        return avail > 0;  // 管道/重定向输入
+    if (h != INVALID_HANDLE_VALUE) {
+        DWORD avail = 0;
+        if (PeekNamedPipe(h, NULL, 0, NULL, &avail, NULL))
+            return avail > 0;  // 管道/重定向输入
+        DWORD err = GetLastError();
+        if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
+            return true;  // 管道写端已关闭（EOF）：可读，POUNCE 将判"猎物腐坏"
+        DWORD mode = 0;
+        if (!GetConsoleMode(h, &mode))
+            // 非控制台、非管道（文件 / NUL 等设备重定向）：立即可读，
+            // 读到 EOF 的行为由 POUNCE 统一判定为"猎物腐坏"
+            return true;
+    }
     return _kbhit() != 0;  // 交互控制台
 #else
-    // POSIX：select 0 超时 = 非阻塞探测
+    // POSIX：select 0 超时 = 非阻塞探测（EOF 亦视为可读，与管道断开语义一致）
     fd_set set;
     FD_ZERO(&set);
     FD_SET(STDIN_FILENO, &set);
