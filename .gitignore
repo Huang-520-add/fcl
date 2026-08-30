@@ -1,7 +1,11 @@
 # 构建产物
 /fcl
+/fcl-bin
+/fcl.exe
 *.o
 *.out
+*.wasm
+*.js.mem
 /build/
 
 # 编辑器与系统

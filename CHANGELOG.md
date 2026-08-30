@@ -29,22 +29,36 @@
 - 全部 11 份文档（中英）+ README + Playground 徽章同步 v3.0：SPROUT 章节重写为三原语组合语义、FOODWEB 捕食行为表述对齐实现
 - 版本号全仓统一 v3.0.0（main.cpp / web_main.cpp / 文档标题与页脚 / README 徽章 / index.html / CI 工作流）
 
-## [未发布]
+## [v3.0.1] — 2026-08-30
+
+### 修复
+- **嵌套 CASE 解析**：`splitCases` 的 CASE 查找升级为花括号深度感知——CASE 段内再嵌套 `MUTATION { CASE ... }` 时，内层 CASE 归属内层作用域，不再被外层切分撕碎（此前解析必然 FCL-0001 报错，EBNF 允许 `statement+` 包含 `mutation` 但解析器不支持）；字符串内的花括号与 CASE 依旧正确跳过
+- **SPEC_EN 尾部损坏**：删除重复的页脚块与夹在中间的乱码孤立行（`�️ RAIN downgraded...`），恢复与中文版一致的附录 C 结构
+
+### 文档（v2.x 旧版语义残留清理，中英同步）
+- **GMO/🧬 标识行为对齐 v3.0 实现**：v3.0 起 🧬 仅 REAL MODE 显示、CODE 模式静默免税——教程第 1/5 课的输出示例（`🧬A`/`🧬65`）、输出对照表、练习答案、SPEC 豁免条款、REFERENCE 6.7/6.13、README 快速开始与语言概述共 10 处修正为"CODE 模式无标识、--real 才显示"
+- **版本号全库统一 v3.0.1**：10 份文档标题与页脚、README 徽章与结构树、`main.cpp`/`web_main.cpp`（`--version` 与 `fcl_version()`）、CI 工作流步骤名
+
+### 变更
+- **仓库瘦身**：移除误提交的 220KB Linux 二进制 `fcl-bin`（三平台产物已由 Releases 提供），`.gitignore` 增加 `/fcl-bin`、`/fcl.exe`、`*.wasm` 等防复发条目
+
+### 新增
+- **测试**：新增 `examples/edge_nested_case.fc` 嵌套变异回归用例（CASE 段内套 MUTATION），黑盒用例 45 → 46；输出断言新增 `--seed 8`（双层变异全触发，内层 DEVOURS 含能量税 20×0.2=4）与解析不再报错断言，断言总数 38 → 40
+
+## [未发布]（已随 v3.0.1 发布）
 
 ### 修复
 - **MUTATION 语义修复（规范-实现对齐）**：变异判定改按物种根名匹配——此前 `MUTATION Wolf_M1` 因变异表以根名为键而**永不触发**（官方示例 20 次运行 0 次变异）；块内引用改名升级为物种级改写（`Wolf_M1`/`Alpha_Wolf` → `Wolv_M1`/`Alpha_Wolv`），块执行期间在册成员临时改名、块结束后恢复原名（块外旧名始终有效）；`MATCH()` 改按物种根名判定（根名/成员名/变异后名称均可）
 - **MUTATION CASE 选择性**：此前所有 CASE 分支无条件执行；现与规范对齐——变异触发时等概率随机表达一个分支，未触发则块空转（教程第 12 课"switch + 随机 case"）
 - **缺参防御**：`MUTATION`/`HIBERNATION` 语句缺操作数时抛 FCL-0001（此前为 vector 越界未定义行为）
-- **SPROUT WASM 守卫**：摩斯电码播放循环（10×180ms）加 `FCL_WASM` 宏保护，浏览器版不再阻塞约 1.8 秒
 - **文档**：能量传递表述全文修正——实现为"仅 20% 能量流向捕食者"（×0.2），原文"扣 20% 能量传递税 / 20% loss"与代码矛盾（README/教程/图鉴/参考/规范/投稿素材，中英同步）；教程 12.2 变异名表与代码对齐（Algae→Algee 等 5 处）；教程 12.3 示例补上缺失的 `Sheep_M1` 引种
 
 ### 变更
 - 变异表移入 ecology 模块作为单一事实来源（解释器与表达式求值共享）；`ExprEval::eval` 的 MATCH 上下文参数改为变异物种根名集合
 
 ### 新增
-- **测试**：新增 `examples/edge_mutation_rename.fc` 回归用例（MATCH 不变量补偿设计：变异触发与否输出恒为 44），用例总数 42 → 43，输出断言 24 → 25
-- **测试**：新增 16 个边界/错误用例（12 个 `edge_*.fc` + 4 个 `err_*.fc`），覆盖数值边界、命名族谱、嵌套控制流等此前未覆盖路径，用例总数 26 → 42
-- **测试**：新增 `tests/output_tests.sh` 输出断言测试（白盒），验证关键用例的实际输出内容，不再只检查退出码；`make test` 同时运行两套测试
+- **测试**：新增 `examples/edge_mutation_rename.fc` 回归用例（MATCH 不变量补偿设计：变异触发与否输出恒为 44）
+- **测试**：新增 `tests/output_tests.sh` 输出断言测试（白盒），验证关键用例的实际输出内容，不再只检查退出码；`make test` 同时运行多套测试
 - **文档**：新增 `docs/ESOLANGS_SUBMISSION.md`（esolangs.org 条目投稿素材，英文）
 - **网页版**：Playground 支持代码分享链接（编码进 URL，打开即还原）
 - **仓库**：新增本更新日志（CHANGELOG）
@@ -88,7 +102,8 @@
 
 ---
 
-[未发布]: https://github.com/Huang-520-add/fcl/compare/v3.0.0...HEAD
+[未发布]: https://github.com/Huang-520-add/fcl/compare/v3.0.1...HEAD
+[v3.0.1]: https://github.com/Huang-520-add/fcl/compare/v3.0.0...v3.0.1
 [v3.0.0]: https://github.com/Huang-520-add/fcl/compare/v2.4.0...v3.0.0
 [v2.4.0]: https://github.com/Huang-520-add/fcl/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/Huang-520-add/fcl/compare/v2.2.0...v2.3.0
