@@ -152,13 +152,21 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
 }
 
 // ------------------------------------------------------------
-//  MUTATION 块内 CASE 分段（P2-5 修复：字符串感知，"..." 内的 CASE 不切分）
+//  MUTATION 块内 CASE 分段
+//  P2-5 修复：字符串感知，"..." 内的 CASE 不切分
+//  P3-1 修复：花括号深度感知——嵌套块（CASE 段内再套 MUTATION { CASE ... } 等）
+//            内层的 CASE 属于内层作用域，外层 splitCases 不得切分
 // ------------------------------------------------------------
 static size_t findCaseOutsideStrings(const std::string& src, size_t from) {
     bool inStr = false;
+    int depth = 0;
     for (size_t i = from; i < src.size(); i++) {
-        if (src[i] == '"') { inStr = !inStr; continue; }
-        if (!inStr && src.compare(i, 4, "CASE") == 0) return i;
+        char c = src[i];
+        if (c == '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (c == '{') { depth++; continue; }
+        if (c == '}') { if (depth > 0) depth--; continue; }
+        if (depth == 0 && src.compare(i, 4, "CASE") == 0) return i;
     }
     return std::string::npos;
 }

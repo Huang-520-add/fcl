@@ -129,6 +129,8 @@ assert_output "edge_mutation_rename.fc" "44"        # MUTATION 物种级改名 +
 assert_flags  "--seed 1" "edge_mutation_rename.fc" "44"   # 固定种子：确定性复现（seed=1 不触发变异）
 assert_flags  "--seed 2" "edge_mutation_rename.fc" "44"   # seed=2 触发变异，不变量仍为 44
 assert_flags  "--seed 2" "edge_mutation_rename.fc" "🧬 变异"
+assert_output "edge_nested_case.fc" "4"             # 嵌套 CASE（CASE 段内套 MUTATION { CASE }）解析不再撕碎
+assert_flags  "--seed 8" "edge_nested_case.fc" "🧬 变异" "4"  # seed=8 双层变异全触发：内层 DEVOURS 含能量税 20×0.2=4
 
 # ---------- v3.0 输入原语（SCENT/LURK/POUNCE 组合） ----------
 assert_stdin "65" "composed_input.fc" "嗅探" "猛扑命中" "65"   # 管道输入被组合捕获
