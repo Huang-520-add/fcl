@@ -120,6 +120,7 @@ fcl/
 │   └── output_tests.sh      # 白盒输出断言测试（25 条断言）
 ├── web/
 │   └── index.html           # 在线 Playground（根 index.html 跳转至此；fcl.js/fcl.wasm 由 CI 编译）
+├── fcl-skill/              # 🆕 AI 技能：蒸馏自官方文档，让 AI 装上后快速学会 FCL 语法
 └── examples/                # 43 个用例
     ├── example1.fc          # 附录示例 1（3+5=8，输出退格符 + U+0008）
     ├── example2.fc          # 附录示例 2（20% 能量传递效率演示）
@@ -146,6 +147,7 @@ fcl/
 - **官方规范** [FCL_SPEC.md](docs/FCL_SPEC.md)（[English](docs/FCL_SPEC_EN.md)）：完整语法、指令集、GC 规则、错误对照表
 - **更新日志** [CHANGELOG.md](CHANGELOG.md)：各版本变更记录（v2.1.0 至今（当前 v3.0.1））
 - **词条投稿** [ESOLANGS_SUBMISSION.md](docs/ESOLANGS_SUBMISSION.md)：esolangs.org 英文词条素材
+- **🆕 AI 技能（Skill）** [fcl-skill/](fcl-skill/)：将本仓库官方文档（SPEC/SYNTAX/REFERENCE/TUTORIAL/ECOLOGY）蒸馏成的 AI 技能包（SKILL.md + reference.md + examples.md）。**目的**：让 AI（如 ima.copilot）装上后能快速学会 FCL 语法，直接生成/解析 .fc 代码，无需逐篇翻文档。与 v3.0.1 严格对齐。
 
 ## 许可
 
