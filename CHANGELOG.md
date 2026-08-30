@@ -33,6 +33,7 @@
 
 ### 修复
 - **嵌套 CASE 解析**：`splitCases` 的 CASE 查找升级为花括号深度感知——CASE 段内再嵌套 `MUTATION { CASE ... }` 时，内层 CASE 归属内层作用域，不再被外层切分撕碎（此前解析必然 FCL-0001 报错，EBNF 允许 `statement+` 包含 `mutation` 但解析器不支持）；字符串内的花括号与 CASE 依旧正确跳过
+- **Windows SCENT 嗅探 EOF**：设备重定向（如 CI 的 `</dev/null` → NUL）与断开管道（EOF）此前嗅不到气味，`SCENT → HIBERNATION { LURK }` 组合在 EOF 场景下无限潜伏；现非控制台非管道句柄与 `ERROR_BROKEN_PIPE` 均判"可读"，POUNCE 统一走"猎物腐坏"路径，与 POSIX 的 select EOF 语义对齐（v3.0.0 起三平台 CI 的 Windows 断言失败即源于此）
 - **SPEC_EN 尾部损坏**：删除重复的页脚块与夹在中间的乱码孤立行（`�️ RAIN downgraded...`），恢复与中文版一致的附录 C 结构
 
 ### 文档（v2.x 旧版语义残留清理，中英同步）
