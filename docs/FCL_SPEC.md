@@ -1,4 +1,4 @@
-# 食物链语言（FCL）官方技术规范 v3.0
+# 食物链语言（FCL）官方技术规范 v3.0.1
 
 发布机构：国际深奥编程语言基金会（IOEF）
 协议名称：金字塔协议（Trophic Pyramid Protocol）
@@ -105,7 +105,7 @@ INTRODUCE <标识符> AS <营养级> WITH <能量表达式> ;
 
 每次 DEVOURS 操作（DECAY 块内分解者除外），能量传递效率强制为 20%：`实际结果 = 理论结果 × 0.2`。
 
-豁免条款：程序首行添加 `GMO ENABLED ;` 恢复 100% 效率，但每次 ROT 输出前打印 🧬 转基因产品标识。
+豁免条款：程序首行添加 `GMO ENABLED ;` 恢复 100% 效率；REAL MODE 下每次 ROT 输出前打印 🧬 转基因产品标识，CODE MODE（默认）不显示（变异静默生效）。
 
 ### 5.4 输入（SCENT/LURK/POUNCE 组合）
 
@@ -309,7 +309,7 @@ ROT Fungus_1 TO STDOUT ;
 5. 重置 Sheep_M1/Algae_1（INTRODUCE 覆盖为 0）
 
 推演：轮 1 → Grass_1=1, Grass_2=2；轮 2 → Grass_1=2, Grass_2=3；轮 3 → Grass_1=3, Grass_2=5；轮 4 → Grass_1=5, Grass_2=8；轮 5 → Grass_1=8，**Grass_2=13=F(7)**。
-DECAY 输出：ASCII 13（回车符）+ `U+000D`。实测输出：`🧬\r🧬U+000D`。
+DECAY 输出：ASCII 13（回车符）+ `U+000D`。实测输出：CODE 模式 `\r` + `U+000D`（REAL 模式为 `🧬\r🧬U+000D`）。
 
 ## 附录 B：标准库（预置物种）
 
@@ -323,7 +323,7 @@ DECAY 输出：ASCII 13（回车符）+ `U+000D`。实测输出：`🧬\r🧬U+0
 - 🐾 扑咬落空，能量减半——APEX 扑咬距离判定
 - 🌩️ RAIN 块语句随机乱序——仅在程序首行 `STORM ENABLED` 后、且块内 >3 条语句时发生
 
-文档版本：v3.0
-最后更新：2026-08-27
+文档版本：v3.0.1
+最后更新：2026-08-30
 
 

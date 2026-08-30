@@ -1,4 +1,4 @@
-# FCL Textbook: The FoodChain Language — English Edition v3.0
+# FCL Textbook: The FoodChain Language — English Edition v3.0.1
 
 > **The "For Real" Beginner's Guide to FCL**
 >
@@ -254,7 +254,7 @@ DECAY {                                    ← [9] DECAY begins
 - `GMO` = Genetically Modified Organism
 - `ENABLED` = turned on
 - What it does: waives the energy-transfer loss (more on this in Lesson 5). Without this, a herbivore only gets 20% of what it eats. With GMO, it gets 100%.
-- Side effect: outputs will have a 🧬 label in front (like a GMO food label).
+- Side effect: in REAL MODE (`--real`) each ROT output gets a 🧬 label in front (like a GMO food label); the default CODE mode stays clean and label-free.
 - You can skip this line, but then your math won't add up correctly.
 
 **Line 3 — `INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;`**
@@ -300,10 +300,10 @@ Save as `hello.fc`, run:
 fcl hello.fc
 ```
 
-Output:
+Output (since v3.0 CODE mode shows no 🧬; run with `--real` to see it):
 
 ```
-🧬A
+A
 U+0041
 ```
 
@@ -311,9 +311,9 @@ U+0041
 
 | What you see | What it means |
 |---|---|
-| `🧬` | GMO label (you enabled GMO mode — this is the "GMO food" sticker) |
 | `A` | ASCII character for code 65 (65 = 'A') |
 | `U+0041` | Hexadecimal representation of 65 (0x41 = 65) |
+| `🧬` | GMO label (**REAL MODE `--real` only**; CODE mode silently waives the tax with a clean output) |
 
 ---
 
@@ -334,13 +334,13 @@ NUMERIC OUTPUT ;   ← Add this line
 BIOME { ... }
 ```
 
-Output becomes:
+Output becomes (CODE mode):
 ```
-🧬65
-🧬65
+65
+65
 ```
 
-Numbers, plain and simple.
+Numbers, plain and simple. (With `--real`: `🧬65`.)
 
 > **Recommendation for beginners**: Always add `NUMERIC OUTPUT ;`. You'll see the actual numbers. Once you understand how ASCII works, try the default mode for the "art" of it.
 
@@ -369,7 +369,7 @@ Numbers, plain and simple.
 
 1. Change Grass's energy from `60+5` to `60+6` and run the program. What character appears? (Hint: 66 = 'B')
 2. Delete the `GMO ENABLED ;` line and run again. Does the output change? (Hint: YES — without GMO, the sheep only gets 20% of the grass's energy)
-3. Change the two ROT lines in DECAY to just one. What output do you get? (Answer: only `🧬A`, no `U+0041`)
+3. Change the two ROT lines in DECAY to just one. What output do you get? (Answer: only `A`, no `U+0041`)
 4. If you put `NUMERIC OUTPUT ;` *after* `GMO ENABLED ;` but *before* the BIOME section, will the program still work? (Answer: Yes — it takes effect globally from wherever it's declared)
 
 ---
@@ -753,10 +753,13 @@ FOODWEB {
 }
 ```
 
-### GMO's cost: every output has a 🧬 prefix
+### GMO's cost: 🧬 label in REAL MODE only
+
+Since v3.0 the 🧬 label is shown **only in REAL MODE** (in code view the modification works silently):
 
 ```
-🧬65    ← The 🧬 means "this result is from GMO mode"
+🧬65    ← GMO mode + --real
+65      ← default CODE mode
 ```
 
 ### GMO's benefits:
@@ -765,7 +768,7 @@ FOODWEB {
 - ✅ Great for precise algorithms (Fibonacci, factorial, etc.)
 
 ### GMO's "downside":
-- ❌ Outputs are prefixed with 🧬
+- ❌ In REAL MODE (`--real`) outputs are prefixed with 🧬; CODE mode (default) shows nothing
 - ❌ But honestly, for learning purposes, you should always use GMO — it's much more intuitive
 
 ---
@@ -1323,6 +1326,8 @@ Ecological meaning: Genetic mutations are random and unpredictable — they're t
 
 Note: mutated names (like `Wolv`) are not in the ecosystem registry — you can't `INTRODUCE` them. A mutant is an alien to the ecosystem.
 
+**Nested mutation**: a CASE segment may contain another `MUTATION { CASE ... }` (inner CASEs belong to the inner scope), yielding "mutation within mutation" multi-level randomness (see `examples/edge_nested_case.fc`).
+
 ---
 
 ## 12.2 The 10 Mutated Names
@@ -1575,5 +1580,5 @@ FCL is Turing complete, but it's not *convenient*:
 
 ---
 
-> Textbook v3.0 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> Textbook v3.0.1 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Quick Reference: [FCL_REFERENCE.md](FCL_REFERENCE.md) | Ecology Guide: [FCL_ECOLOGY.md](FCL_ECOLOGY.md) | Syntax Spec: [FCL_SYNTAX.md](FCL_SYNTAX.md)

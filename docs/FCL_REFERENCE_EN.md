@@ -1,4 +1,4 @@
-# FCL Language Reference — English Edition v3.0
+# FCL Language Reference — English Edition v3.0.1
 
 > **The authoritative technical reference for FCL.**
 > Use this as a lookup guide: syntax, types, instructions, control flow, and garbage collection.
@@ -322,7 +322,7 @@ GMO ENABLED ;   // Must be on the first line, outside the three sections
 ```
 
 - Energy tax → 0% (100% transfer efficiency)
-- Cost: every ROT output prefixed with 🧬
+- Cost: in REAL MODE every ROT output is prefixed with 🧬 (CODE mode shows none)
 
 ### 6.14 Run Modes (REAL MODE / CODE MODE)
 
@@ -436,6 +436,6 @@ src/
 
 ---
 
-> Reference Manual v3.0 (English Edition)
+> Reference Manual v3.0.1 (English Edition)
 > Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Chinese Edition: [FCL_REFERENCE.md](FCL_REFERENCE.md)

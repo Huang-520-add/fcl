@@ -1,4 +1,4 @@
-# FoodChain Language (FCL) Official Technical Specification v3.0
+# FoodChain Language (FCL) Official Technical Specification v3.0.1
 
 Issued by: International Obfuscated Esolang Foundation (IOEF)
 Protocol name: Trophic Pyramid Protocol
@@ -105,7 +105,7 @@ Hard rules:
 
 Every DEVOURS operation (except decomposers inside the DECAY block) has a forced 20% energy-transfer efficiency: `actual result = theoretical result × 0.2`.
 
-Exemption clause: add `GMO ENABLED ;` on the first program line to restore 100% efficiency, but before each ROT output the 🧬 GMO-product marker is printed.
+Exemption clause: add `GMO ENABLED ;` on the first program line to restore 100% efficiency; in REAL MODE a 🧬 GMO-product marker is printed before each ROT output, while the default CODE mode shows none (the modification acts silently).
 
 ### 5.4 Input (SCENT/LURK/POUNCE Combination)
 
@@ -309,7 +309,7 @@ Recurrence logic (A=F(n-1), B=F(n), H is the accumulator, T is the backup):
 5. Reset H/T (INTRODUCE overwrites to 0)
 
 Simulation: round 1 → A=1, B=2; round 2 → A=2, B=3; round 3 → A=3, B=5; round 4 → A=5, B=8; round 5 → A=8, **B=13=F(7)**.
-DECAY output: ASCII 13 (carriage return) + `U+000D`. Actual output: `🧬\r🧬U+000D`.
+DECAY output: ASCII 13 (carriage return) + `U+000D`. Actual output: CODE mode `\r` + `U+000D` (REAL mode: `🧬\r🧬U+000D`).
 
 ## Appendix B: Standard Library (preset species)
 
@@ -323,10 +323,5 @@ DECAY output: ASCII 13 (carriage return) + `U+000D`. Actual output: `🧬\r🧬U
 - 🐾 Bite misses, energy halved — APEX bite-distance judgment
 - 🌩️ RAIN block statements randomly shuffled — only occurs after `STORM ENABLED` on the first program line AND when the block has >3 statements
 
-Document version: v3.0
-Last updated: 2026-08-27
-
-�️ RAIN downgraded to STORM — condition block statement count exceeded
-
-Document version: v3.0
-Last updated: 2026-08-27
+Document version: v3.0.1
+Last updated: 2026-08-30

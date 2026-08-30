@@ -1,4 +1,4 @@
-# FCL 超详细中文教学书（FCL Textbook — Chinese Edition）v3.0
+# FCL 超详细中文教学书（FCL Textbook — Chinese Edition）v3.0.1
 
 > **给"零基础"学习者的大型保姆式教程。**
 >
@@ -252,7 +252,7 @@ DECAY {                                    ← 【9】DECAY 段开始
 - `ENABLED` = 启用
 - 意思是：启用转基因模式
 - 为什么要转基因？因为正常情况下，羊吃草只能拿到 20% 的能量（林德曼定律的传递效率）。开转基因后，100% 传递，免税。
-- 代价是输出时前面会多一个 🧬 标识（表示"这是转基因产品"）
+- 代价：REAL MODE（`--real`）下每次 ROT 输出前会多一个 🧬 转基因产品标识；CODE 模式（默认）静默免税、不显示标识
 
 **第 3 行 `INTRODUCE Grass_1 AS PRODUCER WITH 60+5 ;`**
 - `INTRODUCE` = 引入（把一个新物种放进生态系统）
@@ -292,10 +292,10 @@ DECAY {                                    ← 【9】DECAY 段开始
 fcl hello.fc
 ```
 
-输出：
+输出（v3.0 起 CODE 模式不显示 🧬，见下方说明；`--real` 真实模式才有）：
 
 ```
-🧬A
+A
 U+0041
 ```
 
@@ -303,9 +303,9 @@ U+0041
 
 | 输出 | 含义 |
 |---|---|
-| `🧬` | GMO 转基因标识（开了 GMO ENABLED 就有） |
 | `A` | ASCII 码 65 对应的字符（65 = 'A'） |
 | `U+0041` | 65 的十六进制写法（0x41 = 65 = 'A'） |
+| `🧬` | GMO 转基因标识（**仅 REAL MODE `--real` 显示**；CODE 模式静默免税，输出更干净） |
 
 ---
 
@@ -326,13 +326,13 @@ NUMERIC OUTPUT ;   ← 就是这行
 BIOME { ... }
 ```
 
-输出变成：
+输出变成（CODE 模式）：
 ```
-🧬65
-🧬65
+65
+65
 ```
 
-直接显示数字 65，一目了然。
+直接显示数字 65，一目了然。（`--real` 下为 `🧬65`）
 
 ---
 
@@ -359,7 +359,7 @@ BIOME { ... }
 
 1. 把草的能量从 `60+5` 改成 `60+6`，运行看输出是什么？（提示：66 = 'B'）
 2. 把 `GMO ENABLED ;` 删掉，再运行——输出还一样吗？（答案：不一样，扣税后羊只获得 13）
-3. 把 DECAY 段里的两行 `ROT` 改成一行，输出会变成什么？（答案：只有 `🧬A`，没有 U+0041）
+3. 把 DECAY 段里的两行 `ROT` 改成一行，输出会变成什么？（答案：只有 `A`，没有 U+0041）
 4. 如果把 `NUMERIC OUTPUT ;` 放在 `GMO ENABLED ;` 之后、BIOME 之前，程序还能正常工作吗？（答案：可以）
 
 ---
@@ -757,11 +757,14 @@ FOODWEB {
 }
 ```
 
-### GMO 的代价：输出带 🧬 标识
+### GMO 的代价：REAL MODE 下输出带 🧬 标识
+
+v3.0 起 🧬 标识**仅在 REAL MODE 显示**（代码视角下变异静默生效）：
 
 ```foodchain
-// GMO 模式下的 ROT 输出：
+// GMO 模式 + --real 的 ROT 输出：
 🧬65    ← 🧬 是"转基因产品"标识，提醒你这是 GMO 模式
+// 默认 CODE 模式则只输出：65
 ```
 
 ### GMO 的好处：
@@ -770,7 +773,7 @@ FOODWEB {
 - ✅ 适合需要精确数值的算法（斐波那契、阶乘等）
 
 ### GMO 的坏处：
-- ❌ 输出前面有 🧬 标识（如果是教学演示，不够"干净"）
+- ❌ REAL MODE（`--real`）输出前面有 🧬 标识（如果是教学演示，不够"干净"）；CODE 模式则完全无痕
 - ❌ 但其实没什么实质性坏处——初学者强烈建议开 GMO
 
 ---
@@ -1345,6 +1348,8 @@ MIMICRY Lion_M1 TO Tiger_1 ;
 
 注意：变异名（如 `Wolv`）不在生态圈在册名录中，不能用于 `INTRODUCE` 引种——变异体是生态圈的外来者。
 
+**嵌套变异**：CASE 段内可以再嵌套 `MUTATION { CASE ... }`（内层的 CASE 归内层作用域），形成"变异中再变异"的多层随机结构（见 `examples/edge_nested_case.fc`）。
+
 ---
 
 ## 12.2 10 个物种的变异名
@@ -1625,5 +1630,5 @@ DECAY {
 
 ---
 
-> 教学书 v3.0 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> 教学书 v3.0.1 ｜ 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > 语法速查：[FCL_REFERENCE.md](FCL_REFERENCE.md) ｜ 生态圈图鉴：[FCL_ECOLOGY.md](FCL_ECOLOGY.md) ｜ 语法规范：[FCL_SYNTAX.md](FCL_SYNTAX.md)
