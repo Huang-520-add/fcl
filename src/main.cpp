@@ -1,5 +1,5 @@
 // ============================================================
-//  FCL (FoodChain Language) v3.0.0 —— 入口
+//  FCL (FoodChain Language) v3.0.1 —— 入口
 // ============================================================
 #include "interpreter.h"
 #include <fstream>
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
         std::string a = argv[i];
         if (a == "--real") realMode = true;
         else if (a == "--version") {
-            std::cout << "FCL 食物链语言 v3.0.0 —— 代码在吞噬中传递，真理在分解中显现。" << std::endl;
+            std::cout << "FCL 食物链语言 v3.0.1 —— 代码在吞噬中传递，真理在分解中显现。" << std::endl;
             return 0;
         } else if (a == "--seed" && i + 1 < argc) {
             seed = (unsigned)std::stoul(argv[++i]);
