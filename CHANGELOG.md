@@ -31,6 +31,9 @@
 
 ## [v3.0.1] — 2026-08-30
 
+### 新增
+- ** AI 技能目录**：将官方文档（SPEC/SYNTAX/REFERENCE/TUTORIAL/ECOLOGY）蒸馏成的 AI 技能包（ +  + ）。**目的**：让 AI（如 ima.copilot）装上后能快速学会 FCL 语法，直接生成 / 解析  代码，无需逐篇翻文档。与 v3.0.1 严格对齐。
+
 ### 修复
 - **嵌套 CASE 解析**：`splitCases` 的 CASE 查找升级为花括号深度感知——CASE 段内再嵌套 `MUTATION { CASE ... }` 时，内层 CASE 归属内层作用域，不再被外层切分撕碎（此前解析必然 FCL-0001 报错，EBNF 允许 `statement+` 包含 `mutation` 但解析器不支持）；字符串内的花括号与 CASE 依旧正确跳过
 - **Windows SCENT 嗅探 EOF**：设备重定向（如 CI 的 `</dev/null` → NUL）与断开管道（EOF）此前嗅不到气味，`SCENT → HIBERNATION { LURK }` 组合在 EOF 场景下无限潜伏；现非控制台非管道句柄与 `ERROR_BROKEN_PIPE` 均判"可读"，POUNCE 统一走"猎物腐坏"路径，与 POSIX 的 select EOF 语义对齐（v3.0.0 起三平台 CI 的 Windows 断言失败即源于此）
