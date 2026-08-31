@@ -1,4 +1,4 @@
-# FCL Textbook: The FoodChain Language — English Edition v3.0.2
+# FCL Textbook: The FoodChain Language — English Edition v3.1.0
 
 > **The "For Real" Beginner's Guide to FCL**
 >
@@ -114,7 +114,7 @@ FCL reimagines every standard programming concept through ecology:
 | No `if`/`for`/`while` | Weather (SEASON), Migration (MIGRATION), Hibernation (HIBERNATION) |
 | Garbage collection | Ecological decomposition (Fungus eats corpses) |
 
-**The one-line summary**: FCL is an esolang where the entire programming model is re-expressed as an ecosystem. It's weird, but it's not a toy. (Note: memory is bounded — variables are declared statically in source — so Turing-completeness is **not proven**, though it has the usual building blocks: comparison, conditional loops, and a bounded variable set.)
+**The one-line summary**: FCL is an esolang where the entire programming model is re-expressed as an ecosystem. It's weird, but it's not a toy. (Turing-complete since v3.1.0: an unbounded storage tape (TAPE) + a movable head (FORWARD/BACKWARD) + arithmetic (BUMP) + load/store (LOAD/STORE) + an unbounded loop (WHILE) make it Brainfuck / Turing-machine equivalent, while all earlier syntax is preserved.)
 
 ---
 
@@ -1511,25 +1511,27 @@ DECAY {
 
 **Turing complete** = a system that can simulate any universal Turing machine — meaning, in theory, it can compute anything that is computable.
 
-> **Simple analogy**: A deck of cards can theoretically be used to play any card game (Texas Hold'em, Bridge, Poker...). A deck is "Turing complete" for card games. It's not the *best* tool for every game, but it *can* play them all. FCL is in the same spirit — a weird-rules system with the right building blocks — but its bounded memory leaves Turing-completeness unproven.
+> **Simple analogy**: A deck of cards can theoretically be used to play any card game (Texas Hold'em, Bridge, Poker...). A deck is "Turing complete" for card games. It's not the *best* tool for every game, but it *can* play them all. FCL is in the same spirit — a weird-rules system with the right building blocks — and since v3.1.0 its bounded-memory gap is closed: an unbounded tape (TAPE) + an unbounded WHILE loop make it Turing-complete (Brainfuck / Turing-machine equivalent).
 
 ---
 
-## 15.2 FCL's Three Turing-Complete Capabilities
+## 15.2 FCL's Turing-Completeness Building Blocks
 
-| Capability | FCL implementation | Ordinary language equivalent |
+| Capability | FCL implementation | Brainfuck / ordinary equivalent |
 |---|---|---|
-| **Comparison** | `ASSESS A AGAINST B TO C` | `>`, `==`, `!=` |
-| **Conditional loop** | `HIBERNATION ... UNTIL APEX` | `while` loop |
-| **(Bounded) variable set** | `INTRODUCE` declares a *fixed, finite* set of species in source | Variable list |
+| **Unbounded tape** | `TAPE` (sparse map, unbounded capacity) | Turing-machine tape / array |
+| **Head movement** | `FORWARD` / `BACKWARD` | `>` / `<` |
+| **Arithmetic** | `BUMP <n>` (inc/dec on a cell) | `+` / `-` |
+| **Cell I/O** | `LOAD` / `STORE` (cell ↔ species energy) | `,` / `.` |
+| **Unbounded loop** | `WHILE TAPE UNTIL <expr>` | `[ ... ]` |
 
-**All three building blocks are present — but because storage is bounded (no runtime allocation of new variable names), FCL's Turing-completeness is _not proven_.**
+**All building blocks are present:** an unbounded tape (`TAPE`) + head movement (`FORWARD`/`BACKWARD`) + arithmetic (`BUMP`) + cell I/O (`LOAD`/`STORE`) + an unbounded loop (`WHILE`) make FCL Brainfuck / Turing-machine equivalent — therefore **FCL is Turing-complete since v3.1.0**.
 
 ---
 
 ## 15.3 FCL's Practical Limits
 
-FCL has the building blocks of a Turing-complete system, but its bounded memory means Turing-completeness is **not proven**. Even setting that aside, it is not *convenient*:
+FCL has been Turing-complete since v3.1.0, but its syntax is awkward, so it is not *convenient*:
 
 | Limitation | What it means |
 |---|---|
@@ -1580,5 +1582,5 @@ FCL has the building blocks of a Turing-complete system, but its bounded memory 
 
 ---
 
-> Textbook v3.0.2 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> Textbook v3.1.0 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Quick Reference: [FCL_REFERENCE.md](FCL_REFERENCE.md) | Ecology Guide: [FCL_ECOLOGY.md](FCL_ECOLOGY.md) | Syntax Spec: [FCL_SYNTAX.md](FCL_SYNTAX.md)

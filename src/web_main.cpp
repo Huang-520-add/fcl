@@ -1,5 +1,5 @@
 // ============================================================
-//  FCL WebAssembly 适配层 — v3.0.2
+//  FCL WebAssembly 适配层 — v3.1.0
 //  编译: emcc -O2 -sMODULARIZE=1 -sEXPORT_NAME=createFcl -sWASM=1 \
 //        -sALLOW_MEMORY_GROWTH -sEXPORTED_FUNCTIONS=_fcl_run,_fcl_version,_free \
 //        -sEXPORTED_RUNTIME_METHODS='["stringToNewUTF8","UTF8ToString"]' \
@@ -39,7 +39,7 @@ const char* fcl_run(const char* src) {
 
 EMSCRIPTEN_KEEPALIVE
 const char* fcl_version() {
-    return "v3.0.2";
+    return "v3.1.0";
 }
 
 } // extern "C"

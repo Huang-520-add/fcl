@@ -52,6 +52,11 @@ private:
     bool realMode_ = false;       // REAL MODE：生态等待生效（默认 CODE 快速模式）
     std::mt19937 rng_{ std::random_device{}() };
 
+    // v3.1 无界存储带（图灵完备的核心）：稀疏映射，按需无限增长；
+    // head_ 为带指针，可在带上无界左右移动（Brainfuck 风格）。
+    std::map<long long, long long> tape_;
+    long long head_ = 0;
+
     // 预处理与结构
     std::string stripComments(const std::string& raw);
     std::string extractBlock(const std::string& src, const std::string& name, size_t from);
@@ -93,6 +98,15 @@ private:
     void execMigration(Stmt& s);
     void execHibernation(Stmt& s);
     void execMutation(Stmt& s);
+    void execWhile(Stmt& s);
+
+    // v3.1 无界存储带（图灵完备）
+    long long curCell() const;
+    void execForward(Stmt& s);
+    void execBackward(Stmt& s);
+    void execBump(Stmt& s);
+    void execLoad(Stmt& s);
+    void execStore(Stmt& s);
     static void renameVar(std::vector<Stmt>& v, const std::string& from, const std::string& to);
     void renameVariableInPlace(const std::string& from, const std::string& to);
 

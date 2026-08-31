@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "lexer.h"
 #include <cctype>
 
 namespace fcl {
@@ -39,7 +40,10 @@ static Stmt makeCompound(const std::string& head, std::vector<Stmt> body, int li
     Stmt s;
     s.hasBody = true;
     s.line = lineNo;
-    std::vector<std::string> t = splitWS(head);
+    std::vector<Token> tk = tokenize(head);
+    std::vector<std::string> t;
+    for (auto& x : tk) t.push_back(x.text);
+    s.toks = std::move(tk);
     if (t.empty()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：空的控制块头部", lineNo);
     std::string h0 = t[0];
     if (h0 == "SEASON" || h0 == "RAIN" || h0 == "DRY") {
@@ -66,6 +70,11 @@ static Stmt makeCompound(const std::string& head, std::vector<Stmt> body, int li
         size_t q1 = head.find('"'), q2 = head.find('"', q1 + 1);
         if (q1 != std::string::npos && q2 != std::string::npos) s.branch = head.substr(q1 + 1, q2 - q1 - 1);
         else s.branch = "default";
+    } else if (h0 == "WHILE") {
+        expectTok(t, 2, "UNTIL", "WHILE <物种|TAPE> UNTIL <expr>", lineNo);
+        if (t.size() < 4) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：WHILE 缺少循环条件表达式", lineNo);
+        s.kw = "WHILE";
+        s.args = t;
     } else {
         throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：未知控制块关键字 " + h0, lineNo);
     }
@@ -76,7 +85,10 @@ static Stmt makeCompound(const std::string& head, std::vector<Stmt> body, int li
 static Stmt makeSimple(const std::string& text, int lineNo) {
     Stmt s;
     s.line = lineNo;
-    std::vector<std::string> t = splitWS(text);
+    std::vector<Token> tk = tokenize(text);
+    std::vector<std::string> t;
+    for (auto& x : tk) t.push_back(x.text);
+    s.toks = std::move(tk);
     if (t.empty()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效", lineNo);
     s.args = t;  // 保留原始 tokens，执行器按位置取参
     if (t[0] == "INTRODUCE") {
@@ -145,6 +157,19 @@ static Stmt makeSimple(const std::string& text, int lineNo) {
         s.kind = "REALMODE";
     } else if (t[0] == "CODE" && t.size() >= 2 && t[1] == "MODE") {
         s.kind = "CODEMODE";
+    } else if (t[0] == "FORWARD") {
+        s.kind = "FORWARD";
+    } else if (t[0] == "BACKWARD") {
+        s.kind = "BACKWARD";
+    } else if (t[0] == "BUMP") {
+        if (t.size() < 2) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：BUMP 缺少增量表达式", lineNo);
+        s.kind = "BUMP";
+    } else if (t[0] == "LOAD") {
+        if (t.size() < 2) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：LOAD 缺少目标变量", lineNo);
+        s.kind = "LOAD";
+    } else if (t[0] == "STORE") {
+        if (t.size() < 2) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：STORE 缺少源变量", lineNo);
+        s.kind = "STORE";
     } else {
         throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：未知语句关键字 " + t[0], lineNo);
     }

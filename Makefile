@@ -5,8 +5,8 @@ CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 TARGET    = fcl
 UNIT      = tests/unit_tests
-SRCS      = src/main.cpp src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp
-LIB_SRCS  = src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp
+SRCS      = src/main.cpp src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp src/lexer.cpp
+LIB_SRCS  = src/interpreter.cpp src/parser.cpp src/expr.cpp src/ecology.cpp src/lexer.cpp
 OBJS      = $(SRCS:.cpp=.o)
 LIB_OBJS  = $(LIB_SRCS:.cpp=.o)
 

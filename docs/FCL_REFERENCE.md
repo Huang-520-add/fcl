@@ -1,4 +1,4 @@
-# FCL 官方参考手册（FCL Language Reference）v3.0.2
+# FCL 官方参考手册（FCL Language Reference）v3.1.0
 
 > **代码在吞噬中传递，真理在分解中显现。**
 > 本手册供**查阅**使用：完整定义 FCL 的语法、类型、指令、控制流与垃圾回收。
@@ -23,7 +23,7 @@ FCL（FoodChain Language，食物链语言）是一门**深奥编程语言（Eso
 | 输出 | 分解矿化（ROT，仅分解者可执行，按 ASCII） |
 | 垃圾回收 | 生态分解（只分解"尸体"） |
 
-**有限状态、内存有界（未证明图灵完备）**：FCL 具备比较（ASSESS）、条件循环（HIBERNATION）、源码静态声明的有限变量集（INTRODUCE）；运行时无法动态分配新变量名，可寻址存储有上界。
+**图灵完备（自 v3.1.0 起）**：内置无界存储带（TAPE）+ 可移动读写头（FORWARD/BACKWARD）+ 算术（BUMP）+ 读写（LOAD/STORE）+ 无界循环（WHILE），与 Brainfuck / 图灵机等价；同时保留比较（ASSESS）、条件循环（HIBERNATION）、静态变量集（INTRODUCE）等全部旧语法。
 
 **程序形态**：任何合法程序由强制三段式结构组成：`BIOME`（引种）→ `FOODWEB`（捕食）→ `DECAY`（分解）。
 
@@ -437,5 +437,5 @@ src/
 └── interpreter.h/.cpp  # 执行引擎（指令/控制流/GC）
 ```
 
-文档版本：v3.0.2（参考手册）
+文档版本：v3.1.0（参考手册）
 最后更新：2026-08-27

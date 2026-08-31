@@ -132,6 +132,9 @@ assert_flags  "--seed 2" "edge_mutation_rename.fc" "🧬 变异"
 assert_output "edge_nested_case.fc" "4"             # 嵌套 CASE（CASE 段内套 MUTATION { CASE }）解析不再撕碎
 assert_flags  "--seed 8" "edge_nested_case.fc" "🧬 变异" "4"  # seed=8 双层变异全触发：内层 DEVOURS 含能量税 20×0.2=4
 
+# ---------- v3.1 图灵完备演示（无界存储带 + 无界循环） ----------
+assert_output "tc_double.fc" "14"                 # TAPE + WHILE 计算 2*N（N=7 -> 14），证明无界迭代/存储
+
 # ---------- v3.0 输入原语（SCENT/LURK/POUNCE 组合） ----------
 assert_stdin "65" "composed_input.fc" "嗅探" "猛扑命中" "65"   # 管道输入被组合捕获
 assert_output "composed_input.fc" "嗅探" "腐坏"               # /dev/null stdin（EOF）：扑空不崩溃

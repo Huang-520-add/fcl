@@ -6,8 +6,12 @@
 #include "expr.h"
 #include "ecology.h"
 #include "parser.h"
+#include "lexer.h"
+#include "interpreter.h"
 #include <cmath>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -116,6 +120,48 @@ static void test_ecology() {
     CHECK(renameSpeciesToken("Tiger_1", "Wolf", "Wolv") == "Tiger_1");  // 非目标物种不改
 }
 
+// ---------------- 词法分析器（分词器） ----------------
+static void test_lexer() {
+    auto toks = tokenize("INTRODUCE Grass_1 AS PRODUCER WITH 60");
+    CHECK(toks.size() == 6);
+    CHECK(toks[0].type == TokType::KW);
+    CHECK(toks[0].text == "INTRODUCE");
+    CHECK(toks[1].type == TokType::IDENT);
+    CHECK(toks[1].text == "Grass_1");
+    CHECK(toks[2].type == TokType::KW);                 // AS
+    CHECK(toks[3].type == TokType::IDENT);              // PRODUCER 是营养级，非关键字
+    CHECK(toks[4].type == TokType::KW);                 // WITH
+    CHECK(toks[5].type == TokType::NUM);                // 60
+    // 引号内空白保留为一个 token（与历史 splitWS 一致）
+    auto q = tokenize("CASE \"A CASE in string:\"");
+    CHECK(q.size() == 2);
+    CHECK(q[1].type == TokType::STR);
+    CHECK(q[1].text == "\"A CASE in string:\"");
+    // 负数字面量识别为 NUM
+    auto n = tokenize("BUMP -1");
+    CHECK(n.size() == 2 && n[1].type == TokType::NUM);
+}
+
+// ---------------- 图灵完备（无界存储带 + 无界循环） ----------------
+static void test_turing() {
+    // 与 examples/tc_double.fc 等价的 2*N 程序，N=7 期望输出 14
+    std::string src =
+        "BIOME { INTRODUCE Fox_1 AS CARNIVORE WITH 7 ; INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ; NUMERIC OUTPUT ; } "
+        "FOODWEB { POUNCE Fungus_1 ; STORE Fox_1 ; "
+        "WHILE TAPE UNTIL 0 { FORWARD ; BUMP 1 ; BUMP 1 ; BACKWARD ; BUMP -1 ; } "
+        "FORWARD ; LOAD Fungus_1 ; ROT Fungus_1 TO STDOUT ; } "
+        "DECAY { }";
+    std::stringstream ss;
+    std::streambuf* old = std::cout.rdbuf(ss.rdbuf());
+    bool threw = false;
+    try { fcl::Interp interp; interp.run(src); }
+    catch (...) { threw = true; }
+    std::cout.rdbuf(old);
+    std::string out = ss.str();
+    CHECK(!threw);
+    CHECK(out.find("14") != std::string::npos);
+}
+
 // ---------------- 解析器 ----------------
 static void test_parser() {
     // 基础语句解析
@@ -179,6 +225,10 @@ int main() {
     test_ecology();
     std::printf("[parser]\n"); std::fflush(stdout);
     test_parser();
+    std::printf("[lexer]\n"); std::fflush(stdout);
+    test_lexer();
+    std::printf("[turing]\n"); std::fflush(stdout);
+    test_turing();
     std::printf("单元测试通过: %d / 失败: %d\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

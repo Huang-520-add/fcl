@@ -1,0 +1,21 @@
+BIOME {
+  INTRODUCE Fox_1 AS CARNIVORE WITH 7 ;
+  INTRODUCE Fungus_1 AS DECOMPOSER WITH 0 ;
+  NUMERIC OUTPUT ;
+}
+FOODWEB {
+  POUNCE Fungus_1 ;
+  STORE Fox_1 ;
+  WHILE TAPE UNTIL 0 {
+    FORWARD ;
+    BUMP 1 ;
+    BUMP 1 ;
+    BACKWARD ;
+    BUMP -1 ;
+  }
+  FORWARD ;
+  LOAD Fungus_1 ;
+  ROT Fungus_1 TO STDOUT ;
+}
+DECAY {
+}

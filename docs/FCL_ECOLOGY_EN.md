@@ -1,4 +1,4 @@
-# FCL Ecology Field Guide (FCL Ecology) v3.0.2
+# FCL Ecology Field Guide (FCL Ecology) v3.1.0
 
 > **The essence of FCL: tracing the changes of the ecological tiers.**
 > Every variable is a registered member of the ecosystem; every line of code is an ecological event.
@@ -171,5 +171,5 @@ Every line of FCL code is an ecological event; every run is an ecological succes
 
 Code passes through devouring; truth manifests through decomposition.
 
-Document version: v3.0.2 (Ecology Field Guide)
+Document version: v3.1.0 (Ecology Field Guide)
 Last updated: 2026-08-27

@@ -3,6 +3,27 @@
 本项目遵循语义化版本号：`主版本.次版本.修订号`。
 语言规范的破坏性变更会在主版本升级时说明；新增语言特性随次版本发布。
 
+## [v3.1.0] — 2026-08-31
+
+**新增语言特性（图灵完备 + 架构升级，未引入破坏性变更）**
+
+### 新增
+- **图灵完备（核心）**：新增无界存储带与无界循环，FCL 现已可模拟通用图灵机 / Brainfuck：
+  - 无界存储带：`TAPE` 为稀疏映射 `std::map<long long,int64_t>`，按需无限增长；带指针 `head_` 可无界左右移动（`FORWARD` / `BACKWARD`）。
+  - 带格读写：`BUMP <expr>`（当前格 += 表达式，可为负）、`LOAD <var>`（格子→变量）、`STORE <var>`（变量→格子）；带格为 64 位整数，提供真正无界记忆。
+  - 无界循环：`WHILE <物种|TAPE> UNTIL <expr> { ... }`——当物种变量（或 `TAPE` 当前格）不等于目标值时持续循环；运行期设安全上限（属实现保护，非语言限制）。
+  - 完备性论证：无界存储 + 算术（DEVOURS / BUMP）+ 条件分支（ASSESS / SEASON / CASE）+ 无界循环 = Brainfuck / 图灵机等价 ⇒ **图灵完备**。示例 `examples/tc_double.fc` 用带 + 循环对任意 N 计算 2N（N=7 输出 14）。
+- **独立词法分析器（分词器）**：新增 `src/lexer.h` / `src/lexer.cpp`，将解析器内联的空白切分抽出为类型化 `Token` 流（`KW/IDENT/NUM/STR/...`）；解析器改为词法器驱动，`Stmt` 节点携带 `toks` 词法信息（AST 结构化升级）。与历史 `splitWS` 输出逐字一致，解析 / 单测兼容。
+- **AST 结构化**：`Stmt` 除 `args`（执行取参）外携带 `toks`（类型化 token），解析期即给出词法类型，便于未来工具链复用。
+
+### 测试
+- 单元测试新增词法器分类（关键字 / 标识符 / 数字 / 字符串）与端到端图灵完备检查（运行 `Interp` 捕获 stdout，断言 2N=14）：断言 140 → 155。
+- 黑盒退出码用例 46 → 47（新增 `examples/tc_double.fc`）；白盒输出断言 40 → 41（新增 2N=14 断言）。
+
+### 文档
+- README / FCL_REFERENCE / FCL_SPEC / FCL_TUTORIAL（中英）及 ESOLANGS 投稿：将"未证明图灵完备"更正为"v3.1 起图灵完备"，补充完备性论证与存储带原语说明。
+- 版本号全仓统一 v3.1.0（main.cpp / web_main.cpp / 文档 / README 徽章 / CI 工作流）。
+
 ## [v3.0.2] — 2026-08-31
 
 **缺陷修复（代码评审驱动，未引入语言破坏性变更）**
@@ -133,7 +154,8 @@
 
 ---
 
-[未发布]: https://github.com/Huang-520-add/fcl/compare/v3.0.2...HEAD
+[未发布]: https://github.com/Huang-520-add/fcl/compare/v3.1.0...HEAD
+[v3.1.0]: https://github.com/Huang-520-add/fcl/compare/v3.0.2...v3.1.0
 [v3.0.2]: https://github.com/Huang-520-add/fcl/compare/v3.0.1...v3.0.2
 [v3.0.1]: https://github.com/Huang-520-add/fcl/compare/v3.0.0...v3.0.1
 [v3.0.0]: https://github.com/Huang-520-add/fcl/compare/v2.4.0...v3.0.0

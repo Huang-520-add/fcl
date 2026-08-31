@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "fcl_error.h"
+#include "lexer.h"
 
 namespace fcl {
 
@@ -15,8 +16,11 @@ struct Stmt {
     bool hasBody = false;
     std::string kind;              // 简单语句: GMO/STORM/INTRODUCE/DEVOURS/CLONE/ASSESS/
                                    // SYMBIOSIS/COMPETITION/MIMICRY/ROT/SCENT/LURK/POUNCE/EXTINCTION
-    std::vector<std::string> args; // 原始 token（执行器按位置取参）
+                                   // + v3.1: FORWARD/BACKWARD/BUMP/LOAD/STORE
+    std::vector<std::string> args; // 原始 token（执行器按位置取参；与词法器输出一致）
+    std::vector<Token> toks;       // v3.1：类型化 token 流（AST 节点携带的词法信息）
     std::string kw;                // 复合块: SEASON/MIGRATION/HIBERNATION/MUTATION/CASE
+                                   // + v3.1: WHILE
     std::string branch;            // SEASON 的 RAIN/DRY；CASE 的特征
     std::vector<Stmt> body;
     std::vector<Stmt> dryBody;     // SEASON 的 DRY 分支（与 RAIN 合并，二选一）

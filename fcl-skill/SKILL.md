@@ -1,7 +1,7 @@
 ---
 name: fcl
 description: >
-  FCL（FoodChain Language，食物链语言）v3.0.2 官方文档蒸馏技能。当用户提到
+  FCL（FoodChain Language，食物链语言）v3.1.0 官方文档蒸馏技能。当用户提到
   FCL、食物链语言、.fc 文件、BIOME / FOODWEB / DECAY 三段式、DEVOURS、ROT、
   INTRODUCE、SEASON、HIBERNATION、MUTATION、CLONE、ASSESS、SYMBIOSIS、
   COMPETITION、MIMICRY、SCENT、LURK、POUNCE、EXTINCTION、营养级、物种命名、
@@ -17,7 +17,7 @@ FCL 是一门生态学主题的 **esolang（深奥编程语言）**，图灵完�
 - 程序强制三段式：`BIOME`(引种) → `FOODWEB`(捕食) → `DECAY`(分解)。
 - 维度一维，范式命令式/结构化，**强类型（营养级绑定，5级，无隐式转换）**。
 - 文件扩展名 `.fc`；在线 Playground: https://huang-520-add.github.io/fcl/ ；仓库 `Huang-520-add/fcl`。
-- 版本：**v3.0.2**。
+- 版本：**v3.1.0**。
 
 ## 何时用
 - 需要**生成、补全、修复、解释**一段 FCL（`.fc`）代码时。

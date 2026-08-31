@@ -250,6 +250,7 @@ void Interp::execOne(Stmt& s) {
             else if (s.kw == "MIGRATION") execMigration(s);
             else if (s.kw == "HIBERNATION") execHibernation(s);
             else if (s.kw == "MUTATION") execMutation(s);
+            else if (s.kw == "WHILE") execWhile(s);
             else if (s.kw == "CASE") execStmts(s.body);
             blockDepth_--;
         } else {
@@ -270,6 +271,11 @@ void Interp::execOne(Stmt& s) {
             else if (s.kind == "LURK") execLurk(s);
             else if (s.kind == "POUNCE") execPounce(s);
             else if (s.kind == "EXTINCTION") execExtinction(s);
+            else if (s.kind == "FORWARD") execForward(s);
+            else if (s.kind == "BACKWARD") execBackward(s);
+            else if (s.kind == "BUMP") execBump(s);
+            else if (s.kind == "LOAD") execLoad(s);
+            else if (s.kind == "STORE") execStore(s);
             else throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
         }
     } catch (FclError& e) {
@@ -504,6 +510,73 @@ void Interp::execExtinction(Stmt& s) {
     vars_.erase(it);
     varOrder_.erase(std::remove(varOrder_.begin(), varOrder_.end(), name), varOrder_.end());
     rebuildAddrMap();
+}
+
+// ============================================================
+//  v3.1 无界存储带（图灵完备核心）
+//  设计：稀疏映射 tape_[index]（按需无限增长）+ 可无界移动的带指针 head_。
+//  配合算术（DEVOURS / BUMP）、条件分支（ASSESS / SEASON / CASE）与无界
+//  循环（WHILE），即 Brainfuck / 图灵机等价 ⇒ 图灵完备。
+// ============================================================
+long long Interp::curCell() const {
+    auto it = tape_.find(head_);
+    return (it == tape_.end()) ? 0 : it->second;
+}
+
+void Interp::execForward(Stmt& s) { (void)s; head_++; }
+void Interp::execBackward(Stmt& s) { (void)s; head_--; }
+
+void Interp::execBump(Stmt& s) {
+    // BUMP <expr>：当前带格 += 表达式值（可为负）
+    std::string e;
+    for (size_t i = 1; i < s.args.size(); i++) {
+        if (!e.empty()) e += ' ';
+        e += s.args[i];
+    }
+    if (e.empty()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：BUMP 缺少增量表达式", s.line);
+    double v = ExprEval::eval(e, mutatedRoots_);
+    tape_[head_] += (long long)std::llround(v);
+}
+
+void Interp::execLoad(Stmt& s) {
+    // LOAD <变量>：当前带格 -> 变量
+    std::string name = s.args[1];
+    Variable& v = getVar(name);
+    v.value = (double)curCell();
+    touch(name);
+}
+
+void Interp::execStore(Stmt& s) {
+    // STORE <变量>：变量 -> 当前带格
+    std::string name = s.args[1];
+    Variable& v = getVar(name);
+    tape_[head_] = (long long)std::llround(v.value);
+    touch(name);
+}
+
+void Interp::execWhile(Stmt& s) {
+    // WHILE <物种|TAPE> UNTIL <expr> { ... }
+    // 循环条件：物种变量值（或 TAPE = 当前带格）不等于目标值则继续。
+    if (s.args.size() < 4 || s.args[2] != "UNTIL")
+        throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵：WHILE 语法错误", s.line);
+    std::string operand = s.args[1];
+    std::string exprStr;
+    for (size_t i = 3; i < s.args.size(); i++) {
+        if (!exprStr.empty()) exprStr += ' ';
+        exprStr += s.args[i];
+    }
+    double target = ExprEval::eval(exprStr, mutatedRoots_);
+    const long long MAX_WHILE = 2000000000LL;  // 运行时安全上限（非语言限制）
+    long long guard = 0;
+    while (true) {
+        double cur = (operand == "TAPE") ? (double)curCell() : getVar(operand).value;
+        if (cur == target) break;
+        if (++guard > MAX_WHILE) {
+            std::cout << "⏰ WHILE 超过安全上限，强制退出" << std::endl;
+            break;
+        }
+        execStmts(s.body);
+    }
 }
 
 // ============================================================

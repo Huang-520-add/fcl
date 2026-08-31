@@ -16,7 +16,7 @@
 | **Dimensionality** | 1-dimensional |
 | **Paradigm** | Imperative, structured (mandatory three-phase: BIOME → FOODWEB → DECAY) |
 | **Type system** | Strong; trophic-level-bound (5 levels); no implicit conversion |
-| **Turing complete** | No (not proven — variables are statically declared, no runtime allocation; bounded memory) |
+| **Turing complete** | Yes (since v3.1.0 — unbounded storage tape TAPE + movable head + arithmetic BUMP + load/store + unbounded WHILE loop = Brainfuck / Turing-machine equivalent; named variables are still statically declared) |
 | **Reference implementation** | C++17 interpreter (~1200 lines); also compiled to WebAssembly for an online playground |
 | **License** | MIT |
 | **Repository** | https://github.com/Huang-520-add/fcl |
