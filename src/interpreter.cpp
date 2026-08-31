@@ -456,7 +456,9 @@ void Interp::execRot(Stmt& s) {
     if (gmo_ && realMode_) std::cout << "🧬";
     if (numericOut_) {
         // 数值输出模式：直接打印数值（如 55 → "55"）
-        std::cout << (long long)std::llround(v.value) << std::flush;
+        // 注意：保持与 v3.0.1 一致的截断语义（static_cast），不要用 llround——
+        // 否则 PRODUCER 上限 9999.9 会被舍入成 10000，破坏 edge_producer_max 断言。
+        std::cout << static_cast<long long>(v.value) << std::flush;
         rotFired_[name] = false;
     } else if (!rotFired_[name]) {
         // 编码模式：第一次输出 ASCII 字符（A7 修复：越界值用 '?' 代替乱码）

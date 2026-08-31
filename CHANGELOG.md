@@ -23,6 +23,9 @@
 - **C3 `POUNCE` 坏输入处理**：读失败时丢弃坏数据，避免 `HIBERNATION` 循环反复读同一段坏输入而卡死。
 - **C6 UTF-8 BOM 处理**：读取源文件时剥离 BOM，避免首行解析带乱码。
 
+### 发版后勘误（同版本内修正）
+- **A7 数值模式回退**：`ROT` 数值输出模式恢复 `static_cast<long long>(v.value)` 截断语义（与 v3.0.1 一致）。初版 v3.0.2 误用 `std::llround`，使 `PRODUCER` 上限 `9999.9` 被舍入成 `10000`，破坏 `edge_producer_max` 断言；编码模式的越界保护（`?` / 负数码位钳 0）不变。
+
 ### 文档
 - 修正"图灵完备 / 无限存储"的过度宣称：FCL 内存有界、变量集静态声明、运行时不可动态分配，**未证明图灵完备**（README/FCL_REFERENCE/FCL_SPEC/FCL_TUTORIAL/ESOLANGS 投稿及英文版同步更新）。
 - README 新增"已知限制"小节；修正过时测试数量描述。
