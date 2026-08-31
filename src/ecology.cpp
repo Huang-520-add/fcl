@@ -53,7 +53,13 @@ std::string ecoNameError(const std::string& name, Trophic type) {
         return "⚠️ 分类学混乱！" + sp + " 是" + trophicName(spc->type) + "，不是" + trophicName(type);
     if (spc->social) {
         if (tag == "Alpha") return "";
-        if (tag.size() >= 2 && (tag[0] == 'M' || tag[0] == 'F') && isdigit((unsigned char)tag[1])) return "";
+        // A3 修复：群居成员必须严格为 <M|F><纯数字>，禁止尾随垃圾（如 Wolf_M1X 此前被放行）
+        if (tag.size() >= 2 && (tag[0] == 'M' || tag[0] == 'F') && std::isdigit((unsigned char)tag[1])) {
+            bool allDigits = true;
+            for (size_t i = 1; i < tag.size(); i++)
+                if (!std::isdigit((unsigned char)tag[i])) { allDigits = false; break; }
+            if (allDigits) return "";
+        }
         return "⚠️ 族谱登记混乱！群居物种须为 Alpha_<物种> 或 <物种>_<M/F><编号>";
     }
     bool ok = !tag.empty();

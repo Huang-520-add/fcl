@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <regex>
 #include <sstream>
 #include <thread>
@@ -20,6 +21,31 @@
 #endif
 
 namespace fcl {
+
+// 递归标记 inDecay（A1 修复：此前仅标顶层语句，导致 DECAY 内控制流块中的
+// DEVOURS 失去"分解者豁免营养级检查"与"能量税豁免"）
+static void markDecay(std::vector<Stmt>& v, bool dec) {
+    for (auto& s : v) {
+        s.inDecay = dec;
+        if (s.hasBody) {
+            markDecay(s.body, dec);
+            if (s.hasDry) markDecay(s.dryBody, dec);
+        }
+    }
+}
+
+// 结构化校验 FOODWEB 是否含捕食行为（C2 修复：此前用子串搜索，字符串里的
+// "DEVOURS" 字样会误判；改为遍历语句树）
+static bool hasPredation(const std::vector<Stmt>& v) {
+    for (const auto& s : v) {
+        if (s.kind == "DEVOURS" || s.kind == "SCENT" || s.kind == "POUNCE") return true;
+        if (s.hasBody) {
+            if (hasPredation(s.body)) return true;
+            if (s.hasDry && hasPredation(s.dryBody)) return true;
+        }
+    }
+    return false;
+}
 
 // ============================================================
 //  运行入口
@@ -44,27 +70,54 @@ void Interp::run(const std::string& raw) {
     }
 
     // 三段式提取（按顺序，禁止颠倒）
-    std::string biome = extractBlock(src, "BIOME", 0);
-    size_t bEnd = src.find('}', src.find("BIOME"));
+    // C1 修复：块结束位置用"字符串感知"的匹配花括号计算，与 extractBlock 一致，
+    // 避免 '}' 落在字符串字面量内时被 src.find('}') 误判边界。
+    auto findMatchingBrace = [](const std::string& s, size_t open) {
+        int depth = 0; bool inStr = false;
+        for (size_t i = open; i < s.size(); i++) {
+            if (s[i] == '"') { inStr = !inStr; continue; }
+            if (inStr) continue;
+            if (s[i] == '{') depth++;
+            else if (s[i] == '}') { if (--depth == 0) return i; }
+        }
+        return std::string::npos;
+    };
+    // A4 修复：错误行号改为"文件绝对行号"。注释剥离后每行仍对应一个 '\n'，
+    // 故按从文件开头到块 '{' 之前的换行数即可得绝对行。
+    auto lineAt = [](const std::string& s, size_t pos) {
+        int ln = 1;
+        for (size_t i = 0; i < pos && i < s.size(); i++) if (s[i] == '\n') ln++;
+        return ln;
+    };
+
+    size_t biomeOpen = src.find('{', src.find("BIOME"));
+    size_t bEnd = findMatchingBrace(src, biomeOpen);
     if (bEnd == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
-    std::string foodweb = extractBlock(src, "FOODWEB", bEnd);
-    size_t fEnd = src.find('}', src.find("FOODWEB"));
+    std::string biome = extractBlock(src, "BIOME", 0);
+
+    size_t foodOpen = src.find('{', src.find("FOODWEB", bEnd));
+    size_t fEnd = findMatchingBrace(src, foodOpen);
     if (fEnd == std::string::npos) throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
+    std::string foodweb = extractBlock(src, "FOODWEB", bEnd);
+
+    size_t decayOpen = src.find('{', src.find("DECAY", fEnd));
     std::string decay = extractBlock(src, "DECAY", fEnd);
-    // FOODWEB 必须含捕食行为（v3.0：DEVOURS / SCENT / POUNCE 均可，
-    // 嗅探与猛扑也是捕食链的一环，纯输入组合程序不再被误判为食物链断裂）
-    if (foodweb.find("DEVOURS") == std::string::npos &&
-        foodweb.find("SCENT") == std::string::npos &&
-        foodweb.find("POUNCE") == std::string::npos)
+
+    int lb = lineAt(src, biomeOpen);
+    int lf = lineAt(src, foodOpen);
+    int ld = lineAt(src, decayOpen);
+    std::vector<Stmt> b = parseBlock(biome, lb);
+    std::vector<Stmt> f = parseBlock(foodweb, lf);
+    std::vector<Stmt> d = parseBlock(decay, ld);
+
+    // C2 修复：FOODWEB 必须含捕食行为，改为结构化遍历语句树（此前为子串搜索）
+    if (!hasPredation(f))
         throw FclError(ErrCode::STRUCTURE, "🌍 生态崩溃，食物链断裂！");
 
-    int line = 1;
-    std::vector<Stmt> b = parseBlock(biome, line);
-    std::vector<Stmt> f = parseBlock(foodweb, line);
-    std::vector<Stmt> d = parseBlock(decay, line);
-    for (auto& st : b) st.inDecay = false;
-    for (auto& st : f) st.inDecay = false;
-    for (auto& st : d) st.inDecay = true;
+    // A1 修复：inDecay 递归标记到所有嵌套语句
+    markDecay(b, false);
+    markDecay(f, false);
+    markDecay(d, true);
 
     biomePhase_ = true;
     execStmts(b);
@@ -89,6 +142,26 @@ std::string Interp::stripComments(const std::string& raw) {
             if (!std::regex_match(t, obsRe)) std::cout << "🔭 缺乏科考精神！" << std::endl;
             out << "\n";
         } else if (islower((unsigned char)t[0])) {
+            // A8 修复：小写首字母的行仍按注释忽略，但若其首 token 恰为 FCL 关键字，
+            // 极可能是关键字被小写导致整行被静默吞掉——给出提醒而非无声失败。
+            // （仅看首 token，避免注释里顺带提到关键字时也刷屏警告。）
+            static const char* KW[] = {
+                "INTRODUCE","DEVOURS","CLONE","ASSESS","SYMBIOSIS","COMPETITION",
+                "MIMICRY","ROT","SCENT","LURK","POUNCE","EXTINCTION","SEASON",
+                "MIGRATION","HIBERNATION","MUTATION","CASE","GMO","STORM",
+                "NUMERIC","REAL","CODE","BIOME","FOODWEB","DECAY", nullptr};
+            std::vector<std::string> toks = splitWS(t);
+            if (!toks.empty()) {
+                std::string up = toks[0];
+                for (auto& c : up) c = (char)std::toupper((unsigned char)c);
+                for (const char* k = KW[0]; k != nullptr; k++) {
+                    if (up == k) {
+                        std::cout << "⚠️ 该行以小写开头被当作注释忽略，但首 token 是关键字 "
+                                  << toks[0] << "（是否大小写拼写错误？）" << std::endl;
+                        break;
+                    }
+                }
+            }
             out << "\n";  // 小写内容视为注释
         } else {
             out << line << "\n";
@@ -246,7 +319,11 @@ void Interp::execIntroduce(Stmt& s) {
         dup->second.born = stmtCount_;
         touch(name);
     } else {
-        vars_[name] = Variable{ name, t, v, 0, stmtCount_, true };
+        Variable var;
+        var.name = name; var.type = t; var.value = v;
+        var.age = 0; var.born = stmtCount_; var.alive = true;
+        var.id = nextId_++;   // A9：稳定引入序号，不随 GC/EXTINCTION 重排
+        vars_[name] = var;
         varOrder_.push_back(name);
         addrMap_[name] = varOrder_.size() - 1;
     }
@@ -260,6 +337,9 @@ void Interp::execDevour(Stmt& s) {
     if (!decayer) {
         if (p.type <= q.type || (int)p.type - (int)q.type != 1)
             throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，捕食者拒绝进食");
+        // B5 修复：分解者只能在 DECAY 段分解尸体，禁止在 FOODWEB 直接捕食活体
+        if (p.type == DECOMPOSER)
+            throw FclError(ErrCode::TROPHIC, "🦴 食性冲突，分解者只能在 DECAY 段分解尸体");
     }
     double th = 0;
     if (algo == "SUM") {
@@ -273,9 +353,10 @@ void Interp::execDevour(Stmt& s) {
         if (algo == "QUOT" && q.value == 0)
             throw FclError(ErrCode::DIVZERO, "🔥 干旱导致食物链断裂");
         double raw = (algo == "PROD") ? p.value * q.value : (int)(p.value / q.value);
-        // 扑咬距离：存储地址差为偶数则落空
-        size_t di = addrOf(pred), dj = addrOf(prey);
-        if ((di + dj) % 2 == 0) {
+        // A9 修复：扑咬距离基于变量"稳定 id"（引入序号）的奇偶判定，
+        // 不再依赖 varOrder_ 地址表——后者会随 GC / EXTINCTION 重排而改变，
+        // 导致同一段 PROD/QUOT 的结果随内存抖动而变。
+        if ((p.id + q.id) % 2 == 0) {
             th = raw * 0.5;
             std::cout << "🐾 扑咬落空，能量减半" << std::endl;
         } else {
@@ -375,16 +456,19 @@ void Interp::execRot(Stmt& s) {
     if (gmo_ && realMode_) std::cout << "🧬";
     if (numericOut_) {
         // 数值输出模式：直接打印数值（如 55 → "55"）
-        std::cout << static_cast<long long>(v.value) << std::flush;
+        std::cout << (long long)std::llround(v.value) << std::flush;
         rotFired_[name] = false;
     } else if (!rotFired_[name]) {
-        // 编码模式：第一次输出 ASCII 字符
-        int iv = (int)v.value;
-        std::cout << (char)iv;
+        // 编码模式：第一次输出 ASCII 字符（A7 修复：越界值用 '?' 代替乱码）
+        long long iv = std::llround(v.value);
+        if (iv < 0 || iv > 255) std::cout << '?';
+        else std::cout << (char)iv;
         rotFired_[name] = true;
     } else {
-        // 编码模式：第二次输出 Unicode 码位
-        std::printf("U+%04X", (unsigned int)(int)v.value);
+        // 编码模式：第二次输出 Unicode 码位（A7 修复：负数钳到 0，避免 U+FFFFFFFF 之类乱码）
+        long long cp = std::llround(v.value);
+        if (cp < 0) cp = 0;
+        std::printf("U+%04llX", (unsigned long long)cp);
         rotFired_[name] = false;
     }
     std::cout << std::flush;
@@ -393,10 +477,9 @@ void Interp::execRot(Stmt& s) {
 
 void Interp::execExtinction(Stmt& s) {
     std::string name = s.args[1];
-    if (name == "Virus_Crash") {
-        std::cout << "🦠 Virus_Crash 引爆，进程终止" << std::endl;
-        std::exit(0);
-    }
+    // A6 修复：移除"Virus_Crash"死代码分支——该名非生态圈在册物种，永远无法被
+    // INTRODUCE，分支不可达；且原实现在函数内调用 std::exit(0)，在 WASM/库场景会
+    // 直接杀掉宿主进程，属严重隐患。现统一走正常灭绝逻辑。
     auto it = vars_.find(name);
     if (it == vars_.end()) throw FclError(ErrCode::SYNTAX, "🌿 变异物种入侵，语法免疫系统失效");
     // 十六进制遗照（16 行 × 16 字节）
@@ -515,8 +598,10 @@ void Interp::execPounce(Stmt& s) {
         v.value = x;
         std::cout << "🦅 " << name << " 猛扑命中，捕获能量 " << x << std::endl;
     } else {
-        // 流坏损（EOF/非法数值）：视为扑空
+        // 流坏损（EOF/非法数值）：丢弃坏数据并视为扑空，避免 HIBERNATION 循环里
+        // 反复读同一段坏输入而卡死（C3 修复）
         std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "🦠 " << name << " 扑到的猎物已腐坏，能量保持" << std::endl;
     }
     touch(name);
@@ -567,6 +652,7 @@ void Interp::execHibernation(Stmt& s) {
     std::string name = s.args[1];
     std::string cond = s.args[3];
     requireAPEX(cond);
+    touch(cond);   // A2 修复：条件变量在循环期间被引用，须标记为"活跃"以免被 GC 误回收
     int guard = 0;
     while (getVar(cond).value == 0) {
         if (++guard > 10000) {

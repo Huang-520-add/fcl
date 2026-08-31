@@ -1,4 +1,4 @@
-# FCL Language Reference — English Edition v3.0.1
+# FCL Language Reference — English Edition v3.0.2
 
 > **The authoritative technical reference for FCL.**
 > Use this as a lookup guide: syntax, types, instructions, control flow, and garbage collection.
@@ -9,7 +9,7 @@
 
 ## 1. Language Overview
 
-FCL (FoodChain Language) is a **Turing-complete esoteric programming language** that reimagines every standard programming concept through ecology. It is also an **interpreted, imperative, strongly-typed** language.
+FCL (FoodChain Language) is an esoteric programming language that reimagines every standard programming concept through ecology. It is also an **interpreted, imperative, strongly-typed** language. (Memory is bounded — variables are declared statically in source and cannot be allocated at runtime — so Turing-completeness is **not proven**.)
 
 The core re-mapping:
 
@@ -436,6 +436,6 @@ src/
 
 ---
 
-> Reference Manual v3.0.1 (English Edition)
+> Reference Manual v3.0.2 (English Edition)
 > Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Chinese Edition: [FCL_REFERENCE.md](FCL_REFERENCE.md)

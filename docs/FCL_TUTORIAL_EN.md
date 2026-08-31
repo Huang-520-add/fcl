@@ -1,4 +1,4 @@
-# FCL Textbook: The FoodChain Language — English Edition v3.0.1
+# FCL Textbook: The FoodChain Language — English Edition v3.0.2
 
 > **The "For Real" Beginner's Guide to FCL**
 >
@@ -114,7 +114,7 @@ FCL reimagines every standard programming concept through ecology:
 | No `if`/`for`/`while` | Weather (SEASON), Migration (MIGRATION), Hibernation (HIBERNATION) |
 | Garbage collection | Ecological decomposition (Fungus eats corpses) |
 
-**The one-line summary**: FCL is a Turing-complete esolang where the entire programming model is re-expressed as an ecosystem. It's weird, but it's not a toy — it can theoretically compute anything.
+**The one-line summary**: FCL is an esolang where the entire programming model is re-expressed as an ecosystem. It's weird, but it's not a toy. (Note: memory is bounded — variables are declared statically in source — so Turing-completeness is **not proven**, though it has the usual building blocks: comparison, conditional loops, and a bounded variable set.)
 
 ---
 
@@ -1498,7 +1498,7 @@ DECAY {
 
 ---
 
-# 🌿 Lesson 15: Turing Completeness — How Powerful Is FCL?
+# 🌿 Lesson 15: Computational Power — How Powerful Is FCL?
 
 > **Goals for this lesson:**
 > 1. Understand what "Turing complete" means
@@ -1511,7 +1511,7 @@ DECAY {
 
 **Turing complete** = a system that can simulate any universal Turing machine — meaning, in theory, it can compute anything that is computable.
 
-> **Simple analogy**: A deck of cards can theoretically be used to play any card game (Texas Hold'em, Bridge, Poker...). A deck is "Turing complete" for card games. It's not the *best* tool for every game, but it *can* play them all. FCL is the "weird-rules deck" of programming languages.
+> **Simple analogy**: A deck of cards can theoretically be used to play any card game (Texas Hold'em, Bridge, Poker...). A deck is "Turing complete" for card games. It's not the *best* tool for every game, but it *can* play them all. FCL is in the same spirit — a weird-rules system with the right building blocks — but its bounded memory leaves Turing-completeness unproven.
 
 ---
 
@@ -1521,15 +1521,15 @@ DECAY {
 |---|---|---|
 | **Comparison** | `ASSESS A AGAINST B TO C` | `>`, `==`, `!=` |
 | **Conditional loop** | `HIBERNATION ... UNTIL APEX` | `while` loop |
-| **Unlimited storage** | `INTRODUCE` (arbitrarily many variables) | Variable list |
+| **(Bounded) variable set** | `INTRODUCE` declares a *fixed, finite* set of species in source | Variable list |
 
-**All three together = Turing complete.**
+**All three building blocks are present — but because storage is bounded (no runtime allocation of new variable names), FCL's Turing-completeness is _not proven_.**
 
 ---
 
 ## 15.3 FCL's Practical Limits
 
-FCL is Turing complete, but it's not *convenient*:
+FCL has the building blocks of a Turing-complete system, but its bounded memory means Turing-completeness is **not proven**. Even setting that aside, it is not *convenient*:
 
 | Limitation | What it means |
 |---|---|
@@ -1580,5 +1580,5 @@ FCL is Turing complete, but it's not *convenient*:
 
 ---
 
-> Textbook v3.0.1 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
+> Textbook v3.0.2 | Reference Implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)
 > Quick Reference: [FCL_REFERENCE.md](FCL_REFERENCE.md) | Ecology Guide: [FCL_ECOLOGY.md](FCL_ECOLOGY.md) | Syntax Spec: [FCL_SYNTAX.md](FCL_SYNTAX.md)

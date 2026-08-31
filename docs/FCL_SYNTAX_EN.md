@@ -1,4 +1,4 @@
-# FCL Syntax Specification (FCL Syntax Specification) v3.0.1
+# FCL Syntax Specification (FCL Syntax Specification) v3.0.2
 
 > This document uses both **formal grammar (EBNF)** and **keyword breakdowns** to precisely define FCL's lexical rules and syntactic structure. Intended for: compiler implementers, language researchers, and developers strictly aligning with the specification.
 > For learning → [FCL_TUTORIAL.md](FCL_TUTORIAL.md); for a syntax quick-reference → [FCL_REFERENCE.md](FCL_REFERENCE.md).
@@ -272,5 +272,5 @@ Decomposer DECOMPOSER (5):
 
 ---
 
-> Syntax specification version: v3.0.1
+> Syntax specification version: v3.0.2
 > Reference implementation: [Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)

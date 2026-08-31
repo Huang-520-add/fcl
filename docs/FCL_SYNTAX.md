@@ -1,4 +1,4 @@
-# FCL 语法规范（FCL Syntax Specification）v3.0.1
+# FCL 语法规范（FCL Syntax Specification）v3.0.2
 
 > 本文档以**形式化语法**（EBNF）和**关键词拆解**两种方式，精确定义 FCL 的词法规则与语法结构。适合：编译器实现者、语言研究者、严格对标规范的开发者。
 > 学习入门 → [FCL_TUTORIAL.md](FCL_TUTORIAL.md)；语法速查 → [FCL_REFERENCE.md](FCL_REFERENCE.md)。
@@ -270,5 +270,5 @@ MATCH()      ::= "MATCH(" identifier ")"      // 变异检测：变异→1，未
 
 ---
 
-> 语法规范版本：v3.0.1
+> 语法规范版本：v3.0.2
 > 参考实现：[Huang-520-add/fcl](https://github.com/Huang-520-add/fcl)

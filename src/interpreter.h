@@ -24,6 +24,7 @@ struct Variable {
     double value;
     int age = 0;          // 未被引用轮数（GC 用）
     int born = 0;         // 创建时的指令序号（GC 适应期）
+    int id = 0;           // 引入序号（稳定，不随 GC/EXTINCTION 重排；扑咬距离据此判定）
     bool alive = true;
 };
 
@@ -44,6 +45,7 @@ private:
     int blockDepth_ = 0;          // 复合控制块嵌套深度（块内暂停 GC）
     bool biomePhase_ = false;     // BIOME 引种段（创造阶段，不触发分解）
     int stmtCount_ = 0;
+    int nextId_ = 0;      // 引入序号分配器（稳定 id，不随 GC 重排）
     bool gmo_ = false;
     bool storm_ = false;          // STORM ENABLED：RAIN>3 条语句随机乱序
     bool numericOut_ = false;     // NUMERIC OUTPUT：ROT 直接输出数值（默认编码模式）

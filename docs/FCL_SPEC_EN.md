@@ -1,4 +1,4 @@
-# FoodChain Language (FCL) Official Technical Specification v3.0.1
+# FoodChain Language (FCL) Official Technical Specification v3.0.2
 
 Issued by: International Obfuscated Esolang Foundation (IOEF)
 Protocol name: Trophic Pyramid Protocol
@@ -14,7 +14,7 @@ Reference implementation: C++17 interpreter (fcl); build via `make build` or `g+
 > 5. **New MIMICRY** (mimicry): `MIMICRY <A> TO <B> ;`, B = NOT A.
 > 6. **New HIBERNATION** (hibernation conditional loop): `HIBERNATION <species> UNTIL <APEX> { ... }`, loops until the condition becomes FULL then wakes; each hibernation cycle consumes 10% energy via metabolism.
 > 7. **GC ecology**: decomposers only decompose "corpses" (variables with exhausted energy, value==0); living organisms (energy>0) are safe from decomposition; the BIOME introduction phase (creation stage) pauses decomposition.
-> 8. **Turing completeness**: comparison + boolean logic + conditional loop are all in place, so FCL can express any computable problem.
+> 8. **Bounded memory (Turing-completeness not proven)**: comparison + boolean logic + conditional loop are all in place, but the variable set is declared statically and cannot grow at runtime, so FCL is **not proven** Turing-complete.
 > 9. The v1.2.1/v1.3 revisions (WITH rule, decomposer immunity, GMO marker, CLONE, GC active-period pause, etc.) are all retained.
 
 ## 1. Overview
@@ -323,5 +323,5 @@ DECAY output: ASCII 13 (carriage return) + `U+000D`. Actual output: CODE mode `\
 - 🐾 Bite misses, energy halved — APEX bite-distance judgment
 - 🌩️ RAIN block statements randomly shuffled — only occurs after `STORM ENABLED` on the first program line AND when the block has >3 statements
 
-Document version: v3.0.1
+Document version: v3.0.2
 Last updated: 2026-08-30
